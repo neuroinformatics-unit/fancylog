@@ -1,0 +1,39 @@
+**************  LOG  **************
+
+Analysis carried out: 2019-10-18_15-30-12
+Directory: /home/adam/fancylog/testing
+
+
+**************  GIT INFO  **************
+
+Commit hash: 4679abc4b45a0ad98ad3c32a053ade5213e6fbd5 
+Commit message: Initial commit 
+Commit date & time: Date: 2019-10-17, Time: 10-22-59 
+Commit author: GitHub 
+Commit author email: noreply@github.com
+
+**************  COMMAND LINE ARGUMENTS  **************
+
+Command: /home/adam/fancylog/example.py
+Input arguments: ['/home/adam/fancylog/testing']
+
+**************  VARIABLES  **************
+
+MadeUpArgs
+arg1: True
+another_arg: path/to/somewhere
+the_last_arg: 1000
+
+MadeUpPaths
+path1: /path/to/the_first_place
+path2: /path/to/the_second_place
+path3: /path/to/the_third_place
+
+
+**************  LOGGING  **************
+
+2019-10-18 15:30:12 PM - INFO - MainProcess fancylog.py:260 - Starting logging
+2019-10-18 15:30:12 PM - INFO - MainProcess fancylog.py:262 - Multiprocessing-logging module found. Logging from all processes
+2019-10-18 15:30:12 PM - INFO - MainProcess example.py:36 - This is an info message
+2019-10-18 15:30:12 PM - DEBUG - MainProcess example.py:37 - This is a debug message
+2019-10-18 15:30:12 PM - WARNING - MainProcess example.py:38 - This fun logging experience is about to end :(
