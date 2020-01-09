@@ -182,7 +182,8 @@ class LoggingHeader:
             + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             + "\n"
         )
-        self.file.write("Directory: " + output_dir + "\n")
+        self.file.write("Output directory: " + output_dir + "\n")
+        self.file.write("Current directory: " + os.getcwd() + "\n")
         try:
             self.file.write(f"Version: {self.program.__version__}")
         except AttributeError:
