@@ -5,7 +5,7 @@ requirements = ["luddite"]
 
 setup(
     name="fancylog",
-    version="0.0.3",
+    version="0.0.4",
     description="Fancier logging in Python",
     install_requires=requirements,
     extras_require={"dev": ["black", "pytest-cov", "pytest", "coveralls"]},
