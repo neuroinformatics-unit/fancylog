@@ -22,8 +22,8 @@ from importlib.util import find_spec
 
 
 def start_logging(
-    output_dir,
-    package,
+    output_dir=None,
+    package=None,
     variables=None,
     verbose=True,
     file_log_level="DEBUG",
@@ -34,6 +34,7 @@ def start_logging(
     write_git=True,
     write_cli_args=True,
     write_variables=True,
+    log_to_file=True,
 ):
     """
     Prepares the log file, and then begins logging.
@@ -55,6 +56,8 @@ def start_logging(
     :param write_cli_args: Log the command-line arguments. Default: True
     :param write_variables: Write the attributes of selected objects.
     Default: True
+    :param log_to_file: If True, write a log file, otherwise just print to
+    terminal.
     :return: Path to the logging file
     """
     # TODO: accept PosixPath
@@ -63,26 +66,31 @@ def start_logging(
     else:
         print_log_level = "INFO"
 
-    if filename is None:
-        filename = package.__name__
+    if log_to_file:
+        if filename is None:
+            filename = package.__name__
+        logging_file = datetime.now().strftime(
+            filename + "_%Y-%m-%d_%H-%M-%S.log"
+        )
+        try:
+            logging_file = os.path.join(output_dir, logging_file)
+        except TypeError:
+            logging_file = output_dir.joinpath(logging_file)
+    else:
+        logging_file = None
 
-    logging_file = datetime.now().strftime(filename + "_%Y-%m-%d_%H-%M-%S.log")
-    try:
-        logging_file = os.path.join(output_dir, logging_file)
-    except TypeError:
-        logging_file = output_dir.joinpath(logging_file)
-
-    LoggingHeader(
-        logging_file,
-        package,
-        variables,
-        output_dir,
-        write_header=write_header,
-        write_git=write_git,
-        write_cli_args=write_cli_args,
-        write_variables=write_variables,
-        log_header=log_header,
-    )
+    if logging_file is not None:
+        LoggingHeader(
+            logging_file,
+            package,
+            variables,
+            output_dir,
+            write_header=write_header,
+            write_git=write_git,
+            write_cli_args=write_cli_args,
+            write_variables=write_variables,
+            log_header=log_header,
+        )
 
     setup_logging(
         logging_file,
@@ -94,7 +102,6 @@ def start_logging(
 
 
 class LoggingHeader:
-
     def __init__(
         self,
         file,
@@ -239,11 +246,12 @@ def setup_logging(
         " - %(message)s"
     )
     formatter.datefmt = "%Y-%m-%d %H:%M:%S %p"
-    fh = logging.FileHandler(filename)
 
-    fh.setLevel(getattr(logging, file_level))
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
+    if filename is not None:
+        fh = logging.FileHandler(filename)
+        fh.setLevel(getattr(logging, file_level))
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
 
     ch = logging.StreamHandler()
     ch.setLevel(getattr(logging, print_level))
