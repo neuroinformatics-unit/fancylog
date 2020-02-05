@@ -1,13 +1,10 @@
 from setuptools import setup, find_packages
 
-requirements = ["luddite"]
-
 
 setup(
     name="fancylog",
-    version="0.0.6",
+    version="0.0.7",
     description="Fancier logging in Python",
-    install_requires=requirements,
     extras_require={"dev": ["black", "pytest-cov", "pytest", "coveralls"]},
     python_requires=">=3.6",
     packages=find_packages(),
