@@ -276,3 +276,12 @@ def setup_logging(
     else:
         logging.info("Starting logging")
         logging.info("Not logging multiple processes")
+
+
+def disable_logging():
+    """
+    Prevents any more logging. Saves remembering that logging.disable() with
+    no argument doesn't work.
+    :return:
+    """
+    logging.disable(2 ** 63 - 1)
