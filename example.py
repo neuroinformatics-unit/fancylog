@@ -27,7 +27,11 @@ def main(directory):
     verbose = True
 
     fancylog.start_logging(
-        directory, package, variables=[args, args.paths], verbose=verbose
+        directory,
+        package,
+        variables=[args, args.paths],
+        verbose=verbose,
+        timestamp=True,
     )
 
     logging.info("This is an info message")
