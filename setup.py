@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="fancylog",
-    version="0.1.0",
+    version="0.2.0",
     description="Fancier logging in Python",
     install_requires=["packaging"],
     extras_require={
