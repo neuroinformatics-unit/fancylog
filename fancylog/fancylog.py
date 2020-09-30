@@ -35,6 +35,7 @@ def start_logging(
     write_cli_args=True,
     write_variables=True,
     log_to_file=True,
+    timestamp=True,
 ):
     """
     Prepares the log file, and then begins logging.
@@ -58,6 +59,7 @@ def start_logging(
     Default: True
     :param log_to_file: If True, write a log file, otherwise just print to
     terminal.
+    :param timestamp: If True, add a timestamp to the filename
     :return: Path to the logging file
     """
     # TODO: accept PosixPath
@@ -69,9 +71,9 @@ def start_logging(
     if log_to_file:
         if filename is None:
             filename = package.__name__
-        logging_file = datetime.now().strftime(
-            filename + "_%Y-%m-%d_%H-%M-%S.log"
-        )
+        if timestamp:
+            filename = datetime.now().strftime(filename + "_%Y-%m-%d_%H-%M-%S")
+        logging_file = filename + ".log"
         try:
             logging_file = os.path.join(output_dir, logging_file)
         except TypeError:
