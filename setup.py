@@ -6,7 +6,17 @@ setup(
     version="0.0.9",
     description="Fancier logging in Python",
     install_requires=["packaging"],
-    extras_require={"dev": ["black", "pytest-cov", "pytest", "coveralls"]},
+    extras_require={
+        "dev": [
+            "black",
+            "pytest-cov",
+            "pytest",
+            "coverage",
+            "bump2version",
+            "pre-commit",
+            "flake8",
+        ]
+    },
     python_requires=">=3.6",
     packages=find_packages(),
     include_package_data=True,
@@ -19,6 +29,7 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Intended Audience :: Developers",
     ],
 )
