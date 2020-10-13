@@ -117,7 +117,7 @@ class LoggingHeader:
         log_header=None,
     ):
 
-        self.file = open(file, "w")
+        self.file = open(file, "w", encoding="utf-8")
         self.program = program
         if write_header:
             self.write_log_header(output_dir, log_header)
