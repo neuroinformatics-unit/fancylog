@@ -1,4 +1,4 @@
-__version__ = "0.2.2-rc0"
+__version__ = "0.2.2-rc1"
 __author__ = "Adam Tyson"
 __license__ = "MIT"
 __name__ = "fancylog"
