@@ -10,6 +10,7 @@ import logging
 import os
 import sys
 from datetime import datetime
+from rich.logging import RichHandler
 
 from fancylog.tools.git import (
     get_git_info,
@@ -255,7 +256,7 @@ def setup_logging(
         fh.setFormatter(formatter)
         logger.addHandler(fh)
 
-    ch = logging.StreamHandler()
+    ch = RichHandler()
     ch.setLevel(getattr(logging, print_level))
     ch.setFormatter(formatter)
     logger.addHandler(ch)
