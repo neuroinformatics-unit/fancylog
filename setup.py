@@ -5,7 +5,7 @@ setup(
     name="fancylog",
     version="0.2.1",
     description="Fancier logging in Python",
-    install_requires=["packaging"],
+    install_requires=["packaging", "rich"],
     extras_require={
         "dev": [
             "black",
