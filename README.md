@@ -1,3 +1,11 @@
+[![Python Version](https://img.shields.io/pypi/pyversions/cellfinder.svg)](https://pypi.org/project/cellfinder)
+[![PyPI](https://img.shields.io/pypi/v/fancylog.svg)](https://pypi.org/project/fancylog)
+[![Downloads](https://pepy.tech/badge/fancylog)](https://pepy.tech/project/fancylog)
+[![Wheel](https://img.shields.io/pypi/wheel/fancylog.svg)](https://pypi.org/project/fancylog)
+[![Development Status](https://img.shields.io/pypi/status/fancylog.svg)](https://github.com/adamltyson/fancylog)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
+[![Contributions](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg)](https://github.com/adamltyson/fancylog)
+
 # fancylog
 Fancier logging with python.
 
