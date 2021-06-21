@@ -22,7 +22,7 @@ setup(
     include_package_data=True,
     url="https://github.com/adamltyson/fancylog",
     author="Adam Tyson",
-    author_email="adam.tyson@ucl.ac.uk",
+    author_email="code@adamltyson.com",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Operating System :: POSIX :: Linux",
