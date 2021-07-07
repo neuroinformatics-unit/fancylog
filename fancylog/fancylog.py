@@ -173,7 +173,7 @@ class LoggingHeader:
 
     def write_variables(self, variable_objects):
         self.write_separated_section_header("VARIABLES", bottom_separator="\n")
-        if hasattr(variable_objects[0], '__dict__'):
+        if hasattr(variable_objects[0], "__dict__"):
             self.write_variables_from_object_list(variable_objects)
         else:
             self.write_variables_from_slot_type_list(variable_objects)
@@ -190,7 +190,7 @@ class LoggingHeader:
                 # if one object belongs to another
                 if value not in variable_objects:
                     self.file.write(f"{attr}: {value}\n")
-                    
+
     def write_log_header(self, output_dir, log_header):
         if log_header is None:
             log_header = "LOG"
