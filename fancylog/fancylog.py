@@ -63,7 +63,8 @@ def start_logging(
     :param timestamp: If True, add a timestamp to the filename
     :return: Path to the logging file
     """
-    # TODO: accept PosixPath
+
+    output_dir = str(output_dir)
     if verbose:
         print_log_level = "DEBUG"
     else:
