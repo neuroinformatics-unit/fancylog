@@ -286,9 +286,7 @@ def setup_logging(
 
     """
 
-    initalise_logger(
-        filename, print_level=print_level, file_level=file_level
-    )
+    initalise_logger(filename, print_level=print_level, file_level=file_level)
     if multiprocessing_aware:
         try:
             import multiprocessing_logging
