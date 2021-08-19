@@ -233,11 +233,10 @@ class LoggingHeader:
         )
 
 
-def setup_logging(
+def initalise_logger(
     filename,
     print_level="INFO",
     file_level="DEBUG",
-    multiprocessing_aware=True,
 ):
     """
     Sets up (possibly multiprocessing aware) logging.
@@ -246,8 +245,6 @@ def setup_logging(
     Default: 'INFO'
     :param file_level: What level of logging to print to file.
     Default: 'DEBUG'
-    :param multiprocessing_aware: Default: True
-
     """
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, file_level))
@@ -269,6 +266,29 @@ def setup_logging(
     ch.setLevel(getattr(logging, print_level))
     ch.setFormatter(formatter)
     logger.addHandler(ch)
+    return logger
+
+
+def setup_logging(
+    filename,
+    print_level="INFO",
+    file_level="DEBUG",
+    multiprocessing_aware=True,
+):
+    """
+    Sets up (possibly multiprocessing aware) logging.
+    :param filename: Where to save the logs to
+    :param print_level: What level of logging to print to console.
+    Default: 'INFO'
+    :param file_level: What level of logging to print to file.
+    Default: 'DEBUG'
+    :param multiprocessing_aware: Default: True
+
+    """
+
+    logger = initalise_logger(
+        filename, print_level=print_level, file_level=file_level
+    )
     if multiprocessing_aware:
         try:
             import multiprocessing_logging
