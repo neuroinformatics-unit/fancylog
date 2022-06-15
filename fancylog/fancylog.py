@@ -63,6 +63,9 @@ def start_logging(
     :param timestamp: If True, add a timestamp to the filename
     :return: Path to the logging file
     """
+    # The multiprocessing handler has to be installed before anything else
+    # is run
+    setup_multiprocessing_logging(multiprocessing_aware)
 
     output_dir = str(output_dir)
     if verbose:
@@ -287,25 +290,6 @@ def setup_logging(
     """
 
     initalise_logger(filename, print_level=print_level, file_level=file_level)
-    if multiprocessing_aware:
-        try:
-            import multiprocessing_logging
-
-            multiprocessing_logging.install_mp_handler()
-            logging.info("Starting logging")
-            logging.info(
-                "Multiprocessing-logging module found. Logging from all"
-                " processes"
-            )
-        except ModuleNotFoundError:
-            logging.info("Starting logging")
-            logging.info(
-                "Multiprocessing-logging module not found, not logging "
-                "multiple processes."
-            )
-    else:
-        logging.info("Starting logging")
-        logging.info("Not logging multiple processes")
 
 
 def disable_logging():
@@ -315,3 +299,26 @@ def disable_logging():
     :return:
     """
     logging.disable(2 ** 63 - 1)
+
+
+def setup_multiprocessing_logging(multiprocessing_aware: bool) -> None:
+    """
+    Setup multiprocessing_logging, if requested and the multiprocessing_logging
+    package is installed.
+    """
+    if multiprocessing_aware:
+        try:
+            import multiprocessing_logging
+
+            multiprocessing_logging.install_mp_handler()
+            logging.info(
+                "Multiprocessing-logging module found. Logging from all"
+                " processes"
+            )
+        except ModuleNotFoundError:
+            logging.info(
+                "Multiprocessing-logging module not found, not logging "
+                "multiple processes."
+            )
+    else:
+        logging.info("Not logging multiple processes")
