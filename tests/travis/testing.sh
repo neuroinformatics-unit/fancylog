@@ -1,2 +1,0 @@
-fancylog -h
-pytest

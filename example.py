@@ -1,9 +1,8 @@
-import sys
 import logging
-
-from fancylog import fancylog
+import sys
 
 import fancylog as package
+from fancylog import fancylog
 
 
 class MadeUpPaths:
