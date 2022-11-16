@@ -10,16 +10,15 @@ import logging
 import os
 import sys
 from datetime import datetime
+from importlib.util import find_spec
+
 from rich.logging import RichHandler
 
 from fancylog.tools.git import (
-    get_git_info,
     GitEnvironmentError,
     GitPythonError,
+    get_git_info,
 )
-
-
-from importlib.util import find_spec
 
 
 def start_logging(
@@ -314,4 +313,4 @@ def disable_logging():
     no argument doesn't work.
     :return:
     """
-    logging.disable(2 ** 63 - 1)
+    logging.disable(2**63 - 1)
