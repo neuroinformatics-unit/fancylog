@@ -29,7 +29,7 @@ def start_logging(
     file_log_level="DEBUG",
     filename=None,
     log_header="LOG",
-    multiprocessing_aware=True,
+    multiprocessing_aware=False,
     write_header=True,
     write_git=True,
     write_cli_args=True,
