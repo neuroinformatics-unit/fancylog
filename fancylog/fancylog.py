@@ -261,7 +261,7 @@ def initalise_logger(
     formatter.datefmt = "%Y-%m-%d %H:%M:%S %p"
 
     if filename is not None:
-        fh = logging.FileHandler(filename)
+        fh = logging.FileHandler(filename, encoding="utf-8")
         fh.setLevel(getattr(logging, file_level))
         fh.setFormatter(formatter)
         logger.addHandler(fh)
