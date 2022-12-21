@@ -35,6 +35,7 @@ def start_logging(
     write_cli_args=True,
     write_variables=True,
     log_to_file=True,
+    log_to_stderr=True,
     timestamp=True,
 ):
     """
@@ -60,7 +61,8 @@ def start_logging(
     :param log_to_file: If True, write a log file, otherwise just print to
     terminal.
     :param timestamp: If True, add a timestamp to the filename
-    :return: Path to the logging file
+    :param log_to_stderr: Print logs in stderr or not: Default: True
+    :return: Path to the logging file#
     """
 
     output_dir = str(output_dir)
@@ -100,6 +102,7 @@ def start_logging(
         print_level=print_log_level,
         file_level=file_log_level,
         multiprocessing_aware=multiprocessing_aware,
+        log_to_stderr=log_to_stderr
     )
     return logging_file
 
@@ -236,6 +239,7 @@ def initalise_logger(
     filename,
     print_level="INFO",
     file_level="DEBUG",
+    log_to_stderr=True,
 ):
     """
     Sets up (possibly multiprocessing aware) logging.
@@ -244,6 +248,7 @@ def initalise_logger(
     Default: 'INFO'
     :param file_level: What level of logging to print to file.
     Default: 'DEBUG'
+    :param log_to_stderr: Print logs in stderr or not
     """
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, file_level))
@@ -261,10 +266,12 @@ def initalise_logger(
         fh.setFormatter(formatter)
         logger.addHandler(fh)
 
-    ch = RichHandler()
-    ch.setLevel(getattr(logging, print_level))
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
+    if log_to_stderr:
+        ch = RichHandler()
+        ch.setLevel(getattr(logging, print_level))
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+
     return logger
 
 
@@ -273,6 +280,7 @@ def setup_logging(
     print_level="INFO",
     file_level="DEBUG",
     multiprocessing_aware=True,
+    log_to_stderr=True,
 ):
     """
     Sets up (possibly multiprocessing aware) logging.
@@ -282,10 +290,11 @@ def setup_logging(
     :param file_level: What level of logging to print to file.
     Default: 'DEBUG'
     :param multiprocessing_aware: Default: True
+    :param log_to_stderr: Print logs in stderr or not: Default: True
 
     """
 
-    initalise_logger(filename, print_level=print_level, file_level=file_level)
+    initalise_logger(filename, print_level=print_level, file_level=file_level, log_to_stderr=log_to_stderr)
     if multiprocessing_aware:
         try:
             import multiprocessing_logging
