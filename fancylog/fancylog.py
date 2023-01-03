@@ -61,7 +61,7 @@ def start_logging(
     :param log_to_file: If True, write a log file, otherwise just print to
     terminal.
     :param timestamp: If True, add a timestamp to the filename
-    :param log_to_console: Print logs in stderr or not: Default: True
+    :param log_to_console: Print logs to the console or not: Default: True
     :return: Path to the logging file#
     """
 
@@ -248,7 +248,7 @@ def initalise_logger(
     Default: 'INFO'
     :param file_level: What level of logging to print to file.
     Default: 'DEBUG'
-    :param log_to_console: Print logs in stderr or not
+    :param log_to_console: Print logs to the console or not
     """
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, file_level))
@@ -290,7 +290,7 @@ def setup_logging(
     :param file_level: What level of logging to print to file.
     Default: 'DEBUG'
     :param multiprocessing_aware: Default: True
-    :param log_to_console: Print logs in stderr or not: Default: True
+    :param log_to_console: Print logs to the console or not: Default: True
 
     """
 
