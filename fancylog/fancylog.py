@@ -102,7 +102,7 @@ def start_logging(
         print_level=print_log_level,
         file_level=file_log_level,
         multiprocessing_aware=multiprocessing_aware,
-        log_to_console=log_to_console
+        log_to_console=log_to_console,
     )
     return logging_file
 
@@ -290,11 +290,17 @@ def setup_logging(
     :param file_level: What level of logging to print to file.
     Default: 'DEBUG'
     :param multiprocessing_aware: Default: True
-    :param log_to_console: Print logs to the console or not: Default: True
+    :param log_to_console: Print logs to the console or no.
+    Default: True
 
     """
 
-    initalise_logger(filename, print_level=print_level, file_level=file_level, log_to_console=log_to_console)
+    initalise_logger(
+        filename,
+        print_level=print_level,
+        file_level=file_level,
+        log_to_console=log_to_console,
+    )
     if multiprocessing_aware:
         try:
             import multiprocessing_logging
