@@ -6,4 +6,4 @@ except PackageNotFoundError:
     # package is not installed
     pass
 
-from . import *
+from fancylog.fancylog import start_logging
