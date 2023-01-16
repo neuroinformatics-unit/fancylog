@@ -42,7 +42,7 @@ dev = [
  	"setuptools_scm",
 ]
 
-
+git = ["gitpython"]
 
 [build-system]
 requires = [
