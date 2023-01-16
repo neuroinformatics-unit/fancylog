@@ -235,7 +235,7 @@ class LoggingHeader:
         )
 
 
-def initalise_logger(
+def initialise_logger(
     filename,
     print_level="INFO",
     file_level="DEBUG",
@@ -295,7 +295,7 @@ def setup_logging(
 
     """
 
-    initalise_logger(
+    initialise_logger(
         filename,
         print_level=print_level,
         file_level=file_level,
