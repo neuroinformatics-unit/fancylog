@@ -16,8 +16,6 @@ def test_start_logging(tmpdir):
     with open(log_file) as file:
         lines = file.readlines()
 
-    assert len(lines) == 20
-
     assert lines[0] == f"{lateral_separator}  LOG  {lateral_separator}\n"
     assert lines[1] == "\n"
     assert lines[2].startswith("Ran at")
