@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import fancylog
 
 lateral_separator = "**************"
@@ -9,10 +7,10 @@ def test_import():
     print(fancylog.__version__)
 
 
-def test_start_logging(tmpdir):
-    fancylog.start_logging(tmpdir, fancylog)
+def test_start_logging(tmp_path):
+    fancylog.start_logging(tmp_path, fancylog)
 
-    log_file = next(Path(tmpdir).glob("*.log"))
+    log_file = next(tmp_path.glob("*.log"))
     with open(log_file) as file:
         lines = file.readlines()
 
