@@ -1,0 +1,9 @@
+include LICENSE
+include README.md
+
+exclude example.py
+exclude fancylog*.log
+exclude pytest.ini
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]

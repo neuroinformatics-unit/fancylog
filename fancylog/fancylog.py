@@ -22,8 +22,8 @@ from fancylog.tools.git import (
 
 
 def start_logging(
-    output_dir=None,
-    package=None,
+    output_dir,
+    package,
     variables=None,
     verbose=True,
     file_log_level="DEBUG",
@@ -199,9 +199,7 @@ class LoggingHeader:
             log_header = "LOG"
         self.write_separated_section_header(log_header, top_sep=False)
         self.file.write(
-            "Analysis carried out: "
-            + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            + "\n"
+            "Ran at : " + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "\n"
         )
         self.file.write("Output directory: " + output_dir + "\n")
         self.file.write("Current directory: " + os.getcwd() + "\n")
@@ -235,7 +233,7 @@ class LoggingHeader:
         )
 
 
-def initalise_logger(
+def initialise_logger(
     filename,
     print_level="INFO",
     file_level="DEBUG",
@@ -295,7 +293,7 @@ def setup_logging(
 
     """
 
-    initalise_logger(
+    initialise_logger(
         filename,
         print_level=print_level,
         file_level=file_level,

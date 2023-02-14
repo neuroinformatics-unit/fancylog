@@ -12,7 +12,7 @@ Fancier logging with python.
 Uses the standard python logging library, but (optionally) in addition:
 * Logs code when using the multiprocessing module using
 [multiprocessing-logging](https://github.com/jruere/multiprocessing-logging)
-* Uses [gitpython](https://github.com/gitpython-developers/GitPython)
+* Uses [GitPython](https://github.com/gitpython-developers/GitPython)
 to log information about the git environment.
 * Logs the command-line arguments used to run the software
 * Logs object attributes
@@ -21,6 +21,14 @@ to log information about the git environment.
 #### To install
 ```bash
 pip install fancylog
+```
+
+N.B. For the git logging to work, you need to have [git](https://git-scm.com/) and the
+[GitPython](https://github.com/gitpython-developers/GitPython) package
+installed. The latter can be installed along with `fancylog` using:
+
+```bash
+pip install fancylog[git]
 ```
 
 #### To run example

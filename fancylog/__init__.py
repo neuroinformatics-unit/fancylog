@@ -1,6 +1,9 @@
-__version__ = "0.3.0"
-__author__ = "Adam Tyson"
-__license__ = "MIT"
-__name__ = "fancylog"
+from importlib.metadata import PackageNotFoundError, version
 
-from . import *
+try:
+    __version__ = version("fancylog")
+except PackageNotFoundError:
+    # package is not installed
+    pass
+
+from fancylog.fancylog import start_logging

@@ -1,5 +1,70 @@
+[project]
+name = "fancylog"
+authors = [{name = "Adam Tyson", email= "code@adamltyson.com"}]
+description = "Fancier logging in Python"
+readme = "README.md"
+requires-python = ">=3.6.0"
+dynamic = ["version"]
+
+license = {text = "BSD-3-Clause"}
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: BSD License",
+]
+
+dependencies = ["rich"]
+
+[project.urls]
+homepage = "https://github.com/adamltyson/fancylog"
+bug_tracker = "https://github.com/adamltyson/fancylog/issues"
+documentation = "https://github.com/adamltyson/fancylog"
+source_code = "https://github.com/adamltyson/fancylog"
+user_support = "https://github.com/adamltyson/fancylog/issues"
+
+[project.optional-dependencies]
+dev = [
+	"pytest",
+	"pytest-cov",
+	"coverage",
+	"tox",
+	"black",
+   	"isort",
+    "mypy",
+	"pre-commit",
+	"ruff",
+ 	"setuptools_scm",
+]
+
+git = ["gitpython"]
+
+[build-system]
+requires = [
+    "setuptools>=45",
+    "wheel",
+    "setuptools_scm[toml]>=6.2",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["fancylog*"]
+exclude = ["tests*"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=fancylog"
+
 [tool.black]
-target-version = ['py39']
+target-version = ['py38', 'py39', 'py310', 'py311']
 skip-string-normalization = false
 line-length = 79
 exclude = '''
@@ -23,3 +88,20 @@ exclude = '''
 [tool.isort]
 profile = "black"
 line_length = 79
+
+[tool.setuptools_scm]
+
+[tool.check-manifest]
+ignore = [
+  "*.yaml",
+  ".bumpversion.cfg",
+  "tox.ini",
+  "tests/*",
+  "tests/test_unit/*",
+  "tests/test_integration/*",
+  ".flake8"
+]
+
+[tool.ruff]
+line-length = 79
+exclude = ["__init__.py","build",".eggs"]

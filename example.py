@@ -1,8 +1,7 @@
 import logging
 import sys
 
-import fancylog as package
-from fancylog import fancylog
+import fancylog
 
 
 class MadeUpPaths:
@@ -27,7 +26,7 @@ def main(directory):
 
     fancylog.start_logging(
         directory,
-        package,
+        fancylog,
         variables=[args, args.paths],
         verbose=verbose,
         timestamp=True,
