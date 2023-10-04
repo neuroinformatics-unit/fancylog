@@ -120,7 +120,6 @@ class LoggingHeader:
         write_variables=True,
         log_header=None,
     ):
-
         self.file = open(file, "w", encoding="utf-8")
         self.program = program
         if write_header:
