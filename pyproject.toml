@@ -3,7 +3,7 @@ name = "fancylog"
 authors = [{name = "Adam Tyson", email= "code@adamltyson.com"}]
 description = "Fancier logging in Python"
 readme = "README.md"
-requires-python = ">=3.6.0"
+requires-python = ">=3.9.0"
 dynamic = ["version"]
 
 license = {text = "BSD-3-Clause"}
@@ -11,8 +11,6 @@ license = {text = "BSD-3-Clause"}
 classifiers = [
     "Development Status :: 4 - Beta",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -23,11 +21,11 @@ classifiers = [
 dependencies = ["rich"]
 
 [project.urls]
-homepage = "https://github.com/adamltyson/fancylog"
-bug_tracker = "https://github.com/adamltyson/fancylog/issues"
-documentation = "https://github.com/adamltyson/fancylog"
-source_code = "https://github.com/adamltyson/fancylog"
-user_support = "https://github.com/adamltyson/fancylog/issues"
+homepage = "https://github.com/neuroinformatics-unit/fancylog"
+bug_tracker = "https://github.com/neuroinformatics-unit/fancylog/issues"
+documentation = "https://github.com/neuroinformatics-unit/fancylog"
+source_code = "https://github.com/neuroinformatics-unit/fancylog"
+user_support = "https://github.com/neuroinformatics-unit/fancylog/issues"
 
 [project.optional-dependencies]
 dev = [
@@ -35,11 +33,7 @@ dev = [
 	"pytest-cov",
 	"coverage",
 	"tox",
-	"black",
-   	"isort",
-    "mypy",
 	"pre-commit",
-	"ruff",
  	"setuptools_scm",
 ]
 
@@ -105,3 +99,23 @@ ignore = [
 [tool.ruff]
 line-length = 79
 exclude = ["__init__.py","build",".eggs"]
+
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py{39,310,311}
+isolated_build = True
+
+[gh-actions]
+python =
+    3.9: py39
+    3.10: py310
+    3.11: py311
+
+[testenv]
+extras =
+    dev
+commands =
+    pytest -v --color=yes --cov=fancylog --cov-report=xml
+"""
