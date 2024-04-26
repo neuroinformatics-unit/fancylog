@@ -91,15 +91,6 @@ select = [
   "C90", # McCabe complexity
 #  "D",   # pydocstyle
 ]
-per-file-ignores = { "tests/*" = [
-  "D100", # missing docstring in public module
-  "D205", # missing blank line between summary and description
-  "D103", # missing docstring in public function
-], "examples/*" = [
-  "D400", # first line should end with a period.
-  "D415", # first line should end with a period, question mark...
-  "D205", # missing blank line between summary and description
-] }
 
 [tool.ruff.format]
 docstring-code-format = true # Also format code in docstrings
