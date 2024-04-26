@@ -1,5 +1,4 @@
-"""
-git
+"""git
 ===============
 
 Wrappers around gitpython to return information about the git repository
@@ -9,8 +8,7 @@ for debugging
 
 
 class GitPythonError(Exception):
-    """
-    Exception if gitpython cannot be found (Typical in production
+    """Exception if gitpython cannot be found (Typical in production
     environments).
     """
 
@@ -18,16 +16,13 @@ class GitPythonError(Exception):
 
 
 class GitEnvironmentError(Exception):
-    """
-    Exception if gitpython  fails (Typical in production environments).
-    """
+    """Exception if gitpython  fails (Typical in production environments)."""
 
     pass
 
 
 class GitHead:
-    """
-    Class to parse a repo.head.commit object from gitpython, and return
+    """Class to parse a repo.head.commit object from gitpython, and return
     more informative properties
     """
 
@@ -42,8 +37,7 @@ class GitHead:
 
 
 class GitInfo:
-    """
-    Class to parse a repo object from gitpython, and return more informative
+    """Class to parse a repo object from gitpython, and return more informative
     properties
     """
 
@@ -52,24 +46,20 @@ class GitInfo:
 
 
 def get_git_info(repo_path):
-    """
-    Returns a class with useful information about the git repository.
+    """Returns a class with useful information about the git repository.
     (if there is one). Will only work with "dev" installs (otherwise
     gitpython is not installed)
     :return:
     """
-
     try:
         import git
 
-    except ImportError:
-        raise GitPythonError
-        return None
+    except ImportError as exc:
+        raise GitPythonError from exc
 
     try:
         repo = git.Repo(repo_path)
         return GitInfo(repo)
 
-    except git.InvalidGitRepositoryError:
-        raise GitEnvironmentError
-        return None
+    except git.InvalidGitRepositoryError as exc:
+        raise GitEnvironmentError from exc
