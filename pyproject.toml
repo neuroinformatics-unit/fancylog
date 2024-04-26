@@ -57,32 +57,6 @@ exclude = ["tests*"]
 [tool.pytest.ini_options]
 addopts = "--cov=fancylog"
 
-[tool.black]
-target-version = ['py38', 'py39', 'py310', 'py311']
-skip-string-normalization = false
-line-length = 79
-exclude = '''
-(
-  /(
-      \.eggs
-    | \.git
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-    | examples
-  )/
-)
-'''
-
-[tool.isort]
-profile = "black"
-line_length = 79
-
 [tool.setuptools_scm]
 
 [tool.check-manifest]
@@ -93,12 +67,27 @@ ignore = [
   "tests/*",
   "tests/test_unit/*",
   "tests/test_integration/*",
-  ".flake8"
 ]
 
 [tool.ruff]
 line-length = 79
-exclude = ["__init__.py","build",".eggs"]
+exclude = ["__init__.py", "build", ".eggs"]
+fix = true
+
+[tool.ruff.lint]
+# See https://docs.astral.sh/ruff/rules/
+select = [
+  "E",   # pycodestyle errors
+  "F",   # Pyflakes
+  "UP",  # pyupgrade
+  "I",   # isort
+  "B",   # flake8 bugbear
+  "SIM", # flake8 simplify
+  "C90", # McCabe complexity
+]
+
+[tool.ruff.format]
+docstring-code-format = true # Also format code in docstrings
 
 
 [tool.tox]

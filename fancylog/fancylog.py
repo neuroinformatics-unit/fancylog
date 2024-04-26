@@ -1,11 +1,11 @@
-"""
-fancylog
+"""fancylog
 ===============
 
 Wrapper around the standard logging module, with additional information.
 
 """
 
+import contextlib
 import logging
 import os
 import sys
@@ -38,8 +38,7 @@ def start_logging(
     log_to_console=True,
     timestamp=True,
 ):
-    """
-    Prepares the log file, and then begins logging.
+    """Prepares the log file, and then begins logging.
 
     :param output_dir: Directory to save the log file
     :param package: What python package are we logging?
@@ -64,12 +63,8 @@ def start_logging(
     :param log_to_console: Print logs to the console or not: Default: True
     :return: Path to the logging file#
     """
-
     output_dir = str(output_dir)
-    if verbose:
-        print_log_level = "DEBUG"
-    else:
-        print_log_level = "INFO"
+    print_log_level = "DEBUG" if verbose else "INFO"
 
     if log_to_file:
         if filename is None:
@@ -120,18 +115,17 @@ class LoggingHeader:
         write_variables=True,
         log_header=None,
     ):
-        self.file = open(file, "w", encoding="utf-8")
         self.program = program
-        if write_header:
-            self.write_log_header(output_dir, log_header)
-        if write_git:
-            self.write_git_info(self.program.__name__)
-        if write_cli_args:
-            self.write_command_line_arguments()
-        if write_variables and variable_objects:
-            self.write_variables(variable_objects)
 
-        self.file.close()
+        with open(file, "w", encoding="utf-8") as self.file:
+            if write_header:
+                self.write_log_header(output_dir, log_header)
+            if write_git:
+                self.write_git_info(self.program.__name__)
+            if write_cli_args:
+                self.write_command_line_arguments()
+            if write_variables and variable_objects:
+                self.write_variables(variable_objects)
 
     def write_git_info(self, program_name, header="GIT INFO"):
         self.write_separated_section_header(header)
@@ -142,18 +136,14 @@ class LoggingHeader:
             program_path = os.path.split(program_path)[0]
             git_info = get_git_info(program_path)
 
-            self.file.write("Commit hash: {} \n".format(git_info.head.hash))
+            self.file.write(f"Commit hash: {git_info.head.hash} \n")
+            self.file.write(f"Commit message: {git_info.head.message} \n")
+            self.file.write(f"Commit date & time: {git_info.head.datetime} \n")
             self.file.write(
-                "Commit message: {} \n".format(git_info.head.message)
+                f"Commit author: {git_info.head.committer_name} \n"
             )
             self.file.write(
-                "Commit date & time: {} \n".format(git_info.head.datetime)
-            )
-            self.file.write(
-                "Commit author: {} \n".format(git_info.head.committer_name)
-            )
-            self.file.write(
-                "Commit author email: {}".format(git_info.head.committer_email)
+                f"Commit author email: {git_info.head.committer_email}"
             )
 
         except GitPythonError:
@@ -202,10 +192,8 @@ class LoggingHeader:
         )
         self.file.write("Output directory: " + output_dir + "\n")
         self.file.write("Current directory: " + os.getcwd() + "\n")
-        try:
+        with contextlib.suppress(AttributeError):
             self.file.write(f"Version: {self.program.__version__}")
-        except AttributeError:
-            pass
 
     def write_separated_section_header(
         self,
@@ -238,8 +226,7 @@ def initialise_logger(
     file_level="DEBUG",
     log_to_console=True,
 ):
-    """
-    Sets up (possibly multiprocessing aware) logging.
+    """Sets up (possibly multiprocessing aware) logging.
     :param filename: Where to save the logs to
     :param print_level: What level of logging to print to console.
     Default: 'INFO'
@@ -279,8 +266,7 @@ def setup_logging(
     multiprocessing_aware=True,
     log_to_console=True,
 ):
-    """
-    Sets up (possibly multiprocessing aware) logging.
+    """Sets up (possibly multiprocessing aware) logging.
     :param filename: Where to save the logs to
     :param print_level: What level of logging to print to console.
     Default: 'INFO'
@@ -291,7 +277,6 @@ def setup_logging(
     Default: True
 
     """
-
     initialise_logger(
         filename,
         print_level=print_level,
@@ -320,8 +305,7 @@ def setup_logging(
 
 
 def disable_logging():
-    """
-    Prevents any more logging. Saves remembering that logging.disable() with
+    """Prevents any more logging. Saves remembering that logging.disable() with
     no argument doesn't work.
     :return:
     """
