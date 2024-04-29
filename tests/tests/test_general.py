@@ -1,5 +1,6 @@
-import fancylog
 import logging
+
+import fancylog
 
 lateral_separator = "**************"
 
@@ -31,11 +32,9 @@ def test_logger_name(tmp_path):
     logger_name = "hello_world"
 
     # Logger name should not already exist
-    assert logger_name not in logging.root.manager.loggerDict.keys()
+    assert logger_name not in logging.root.manager.loggerDict
 
     # Logger name should be created
     fancylog.start_logging(tmp_path, fancylog, logger_name=logger_name)
 
-    assert logger_name in logging.root.manager.loggerDict.keys()
-
-
+    assert logger_name in logging.root.manager.loggerDict
