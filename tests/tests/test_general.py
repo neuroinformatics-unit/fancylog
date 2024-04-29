@@ -1,4 +1,5 @@
 import fancylog
+import logging
 
 lateral_separator = "**************"
 
@@ -20,3 +21,21 @@ def test_start_logging(tmp_path):
     assert lines[3].startswith("Output directory: ")
     assert lines[4].startswith("Current directory: ")
     assert lines[5].startswith("Version: ")
+
+
+def test_logger_name(tmp_path):
+    """
+    Quick check that expecter logger name is created
+    when specified.
+    """
+    logger_name = "hello_world"
+
+    # Logger name should not already exist
+    assert logger_name not in logging.root.manager.loggerDict.keys()
+
+    # Logger name should be created
+    fancylog.start_logging(tmp_path, fancylog, logger_name=logger_name)
+
+    assert logger_name in logging.root.manager.loggerDict.keys()
+
+
