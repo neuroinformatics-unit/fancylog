@@ -37,7 +37,7 @@ def start_logging(
     log_to_file=True,
     log_to_console=True,
     timestamp=True,
-    logger_name=False,
+    logger_name=None,
 ):
     """Prepares the log file, and then begins logging.
 
@@ -62,7 +62,7 @@ def start_logging(
     terminal.
     :param log_to_console: Print logs to the console or not: Default: True
     :param timestamp: If True, add a timestamp to the filename
-    :param logger_name: If False, logger uses default logger. Otherwise,
+    :param logger_name: If None, logger uses default logger. Otherwise,
         logger name is set to `logger_name`.
     :return: Path to the logging file#
     """
@@ -229,7 +229,7 @@ def initialise_logger(
     print_level="INFO",
     file_level="DEBUG",
     log_to_console=True,
-    logger_name=False,
+    logger_name=None,
 ):
     """Sets up (possibly multiprocessing aware) logging.
     :param filename: Where to save the logs to
@@ -238,6 +238,8 @@ def initialise_logger(
     :param file_level: What level of logging to print to file.
     Default: 'DEBUG'
     :param log_to_console: Print logs to the console or not
+    :param logger_name: If None, logger uses default logger. Otherwise,
+    logger name is set to `logger_name`.
     """
     if logger_name:
         logger = logging.getLogger(logger_name)
@@ -274,7 +276,7 @@ def setup_logging(
     file_level="DEBUG",
     multiprocessing_aware=True,
     log_to_console=True,
-    logger_name=False,
+    logger_name=None,
 ):
     """Sets up (possibly multiprocessing aware) logging.
     :param filename: Where to save the logs to
@@ -285,7 +287,8 @@ def setup_logging(
     :param multiprocessing_aware: Default: True
     :param log_to_console: Print logs to the console or no.
     Default: True
-
+    :param logger_name: If None, logger uses default logger. Otherwise,
+        logger name is set to `logger_name`.
     """
     initialise_logger(
         filename,
