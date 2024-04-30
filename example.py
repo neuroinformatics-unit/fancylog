@@ -30,11 +30,14 @@ def main(directory):
         variables=[args, args.paths],
         verbose=verbose,
         timestamp=True,
+        logger_name="my_logger"
     )
 
-    logging.info("This is an info message")
-    logging.debug("This is a debug message")
-    logging.warning("This fun logging experience is about to end :(")
+    logger = logging.getLogger("my_logger")
+
+    logger.info("This is an info message")
+    logger.debug("This is a debug message")
+    logger.warning("This fun logging experience is about to end :(")
 
 
 if __name__ == "__main__":
