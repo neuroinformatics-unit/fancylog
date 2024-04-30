@@ -30,7 +30,7 @@ def main(directory):
         variables=[args, args.paths],
         verbose=verbose,
         timestamp=True,
-        logger_name="my_logger"
+        logger_name="my_logger",
     )
 
     logger = logging.getLogger("my_logger")
