@@ -37,6 +37,7 @@ def start_logging(
     log_to_file=True,
     log_to_console=True,
     timestamp=True,
+    logger_name=None,
 ):
     """Prepares the log file, and then begins logging.
 
@@ -59,8 +60,10 @@ def start_logging(
     Default: True
     :param log_to_file: If True, write a log file, otherwise just print to
     terminal.
-    :param timestamp: If True, add a timestamp to the filename
     :param log_to_console: Print logs to the console or not: Default: True
+    :param timestamp: If True, add a timestamp to the filename
+    :param logger_name: If None, logger uses default logger. Otherwise,
+        logger name is set to `logger_name`.
     :return: Path to the logging file#
     """
     output_dir = str(output_dir)
@@ -98,6 +101,7 @@ def start_logging(
         file_level=file_log_level,
         multiprocessing_aware=multiprocessing_aware,
         log_to_console=log_to_console,
+        logger_name=logger_name,
     )
     return logging_file
 
@@ -225,6 +229,7 @@ def initialise_logger(
     print_level="INFO",
     file_level="DEBUG",
     log_to_console=True,
+    logger_name=None,
 ):
     """Sets up (possibly multiprocessing aware) logging.
     :param filename: Where to save the logs to
@@ -233,8 +238,14 @@ def initialise_logger(
     :param file_level: What level of logging to print to file.
     Default: 'DEBUG'
     :param log_to_console: Print logs to the console or not
+    :param logger_name: If None, logger uses default logger. Otherwise,
+    logger name is set to `logger_name`.
     """
-    logger = logging.getLogger()
+    if logger_name:
+        logger = logging.getLogger(logger_name)
+    else:
+        logger = logging.getLogger()
+
     logger.setLevel(getattr(logging, file_level))
 
     formatter = logging.Formatter(
@@ -265,6 +276,7 @@ def setup_logging(
     file_level="DEBUG",
     multiprocessing_aware=True,
     log_to_console=True,
+    logger_name=None,
 ):
     """Sets up (possibly multiprocessing aware) logging.
     :param filename: Where to save the logs to
@@ -275,13 +287,15 @@ def setup_logging(
     :param multiprocessing_aware: Default: True
     :param log_to_console: Print logs to the console or no.
     Default: True
-
+    :param logger_name: If None, logger uses default logger. Otherwise,
+        logger name is set to `logger_name`.
     """
     initialise_logger(
         filename,
         print_level=print_level,
         file_level=file_level,
         log_to_console=log_to_console,
+        logger_name=logger_name,
     )
     if multiprocessing_aware:
         try:
