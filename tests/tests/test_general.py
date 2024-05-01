@@ -42,6 +42,26 @@ def test_logger_name(tmp_path):
     assert logger_name in logging.root.manager.loggerDict
 
 
+def test_logging_to_console(tmp_path, capsys):
+    """
+    Check that logs are written to stdout when
+    `log_to_console` is `True`.
+    """
+    logger_name = "hello_world"
+
+    fancylog.start_logging(
+        tmp_path, fancylog, log_to_console=True, logger_name=logger_name
+    )
+
+    logger = logging.getLogger(logger_name)
+
+    logger.debug("!!£%$")
+
+    captured = capsys.readouterr()
+
+    assert "!!£%$" in captured.out
+
+
 def test_correct_handlers_are_set(tmp_path):
     """
     Test the handlers on the logger are as specified by the
@@ -51,7 +71,7 @@ def test_correct_handlers_are_set(tmp_path):
     """
     logger_name = "hello_world"
 
-    # Test no handlers are assigned when non requested
+    # Test no handlers are assigned when not requested
     fancylog.start_logging(
         tmp_path,
         fancylog,
@@ -141,3 +161,36 @@ def test_handlers_are_refreshed(tmp_path):
     )
 
     assert logger.handlers == []
+
+
+def test_named_logger_propagate(tmp_path, capsys):
+    """
+    By default, named loggers will propagate through
+    parent handlers. Root is always parent to named loggers.
+    This means that named logger can still print to console
+    through the root StreamHandler unless `propagate` is set
+    to `False`. Check here that
+    """
+    logger_name = "hello_world"
+
+    fancylog.start_logging(
+        tmp_path, fancylog, logger_name=logger_name, log_to_console=False
+    )  # , log_to_console=False)
+
+    logger = logging.getLogger(logger_name)
+
+    assert logger.propagate is False
+
+    logger.debug("XN$£ not in stdout")
+
+    logging.debug("YYXX in stdout")
+
+    logger.debug("PQ&* not in stdout")
+
+    captured = capsys.readouterr()
+
+    assert "XN$£" not in captured.out, "logger initially writing to stdout"
+    assert "YYXX" in captured.out, "root is not writing to stdout"
+    assert (
+        "PQ&*" not in captured.out
+    ), "logger writing to stdout through root handler"
