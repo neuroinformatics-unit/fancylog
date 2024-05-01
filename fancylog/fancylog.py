@@ -298,18 +298,25 @@ def setup_logging(
         logger_name=logger_name,
     )
     if multiprocessing_aware:
+        if logger_name:
+            raise ValueError(
+                "`multiprocessing_aware` is not supported"
+                "with `logger_name`. Multiprocess logging"
+                "must be performed with the root logger."
+            )
+
         try:
             import multiprocessing_logging
 
             multiprocessing_logging.install_mp_handler()
-            logger.info("Starting logging")
-            logger.info(
+            logging.info("Starting logging")
+            logging.info(
                 "Multiprocessing-logging module found. Logging from all"
                 " processes"
             )
         except ModuleNotFoundError:
-            logger.info("Starting logging")
-            logger.info(
+            logging.info("Starting logging")
+            logging.info(
                 "Multiprocessing-logging module not found, not logging "
                 "multiple processes."
             )
