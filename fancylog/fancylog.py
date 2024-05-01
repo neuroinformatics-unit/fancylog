@@ -290,7 +290,7 @@ def setup_logging(
     :param logger_name: If None, logger uses default logger. Otherwise,
         logger name is set to `logger_name`.
     """
-    initialise_logger(
+    logger = initialise_logger(
         filename,
         print_level=print_level,
         file_level=file_level,
@@ -302,20 +302,20 @@ def setup_logging(
             import multiprocessing_logging
 
             multiprocessing_logging.install_mp_handler()
-            logging.info("Starting logging")
-            logging.info(
+            logger.info("Starting logging")
+            logger.info(
                 "Multiprocessing-logging module found. Logging from all"
                 " processes"
             )
         except ModuleNotFoundError:
-            logging.info("Starting logging")
-            logging.info(
+            logger.info("Starting logging")
+            logger.info(
                 "Multiprocessing-logging module not found, not logging "
                 "multiple processes."
             )
     else:
-        logging.info("Starting logging")
-        logging.info("Not logging multiple processes")
+        logger.info("Starting logging")
+        logger.info("Not logging multiple processes")
 
 
 def disable_logging():
