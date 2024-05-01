@@ -169,13 +169,14 @@ def test_named_logger_propagate(tmp_path, capsys):
     parent handlers. Root is always parent to named loggers.
     This means that named logger can still print to console
     through the root StreamHandler unless `propagate` is set
-    to `False`. Check here that
+    to `False`. Check here that propagate is set to False and
+    indeed named logger does not print to console.
     """
     logger_name = "hello_world"
 
     fancylog.start_logging(
         tmp_path, fancylog, logger_name=logger_name, log_to_console=False
-    )  # , log_to_console=False)
+    )
 
     logger = logging.getLogger(logger_name)
 
