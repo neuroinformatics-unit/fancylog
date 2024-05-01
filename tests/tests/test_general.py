@@ -163,7 +163,7 @@ def test_handlers_are_refreshed(tmp_path):
     assert logger.handlers == []
 
 
-def test_named_logger_propagate(tmp_path, capsys):
+def test_named_logger_doesnt_propagate(tmp_path, capsys):
     """
     By default, named loggers will propagate through
     parent handlers. Root is always parent to named loggers.
