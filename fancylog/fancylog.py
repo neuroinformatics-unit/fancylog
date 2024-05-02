@@ -292,7 +292,7 @@ def setup_logging(
     :param logger_name: If None, logger uses default logger. Otherwise,
         logger name is set to `logger_name`.
     """
-    initialise_logger(
+    logger = initialise_logger(
         filename,
         print_level=print_level,
         file_level=file_level,
@@ -300,6 +300,13 @@ def setup_logging(
         logger_name=logger_name,
     )
     if multiprocessing_aware:
+        if logger_name:
+            raise ValueError(
+                "`multiprocessing_aware` is not supported"
+                "with `logger_name`. Multiprocess logging"
+                "must be performed with the root logger."
+            )
+
         try:
             import multiprocessing_logging
 
@@ -316,8 +323,8 @@ def setup_logging(
                 "multiple processes."
             )
     else:
-        logging.info("Starting logging")
-        logging.info("Not logging multiple processes")
+        logger.info("Starting logging")
+        logger.info("Not logging multiple processes")
 
 
 def disable_logging():

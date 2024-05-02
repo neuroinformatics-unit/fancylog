@@ -1,5 +1,6 @@
 import logging
 
+import pytest
 from rich.logging import RichHandler
 
 import fancylog
@@ -40,6 +41,22 @@ def test_logger_name(tmp_path):
     fancylog.start_logging(tmp_path, fancylog, logger_name=logger_name)
 
     assert logger_name in logging.root.manager.loggerDict
+
+
+def test_assert_named_logger_with_multiprocessing(tmp_path):
+    """
+    Test an error is raised if trying to use multiprocess
+    logging with a named logger.
+    """
+    with pytest.raises(ValueError) as e:
+        fancylog.start_logging(
+            tmp_path,
+            fancylog,
+            logger_name="hello_world",
+            multiprocessing_aware=True,
+        )
+
+    assert "root logger" in str(e.value)
 
 
 def test_logging_to_console(tmp_path, capsys):
