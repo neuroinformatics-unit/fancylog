@@ -1,7 +1,6 @@
 import logging
 
 import pytest
-
 from rich.logging import RichHandler
 
 import fancylog
@@ -58,6 +57,7 @@ def test_assert_named_logger_with_multiprocessing(tmp_path):
         )
 
     assert "root logger" in str(e.value)
+
 
 def test_logging_to_console(tmp_path, capsys):
     """
