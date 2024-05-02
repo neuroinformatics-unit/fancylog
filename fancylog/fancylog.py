@@ -244,6 +244,7 @@ def initialise_logger(
     if logger_name:
         logger = logging.getLogger(logger_name)
         logger.handlers = []
+        logger.propagate = False
     else:
         logger = logging.getLogger()
 
