@@ -1,4 +1,4 @@
-[![Python Version](https://img.shields.io/pypi/pyversions/cellfinder.svg)](https://pypi.org/project/cellfinder)
+[![Python Version](https://img.shields.io/pypi/pyversions/fancylog.svg)](https://pypi.org/project/fancylog)
 [![PyPI](https://img.shields.io/pypi/v/fancylog.svg)](https://pypi.org/project/fancylog)
 [![Downloads](https://pepy.tech/badge/fancylog)](https://pepy.tech/project/fancylog)
 [![Wheel](https://img.shields.io/pypi/wheel/fancylog.svg)](https://pypi.org/project/fancylog)
