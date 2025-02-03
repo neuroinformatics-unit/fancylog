@@ -209,6 +209,6 @@ def test_named_logger_doesnt_propagate(tmp_path, capsys):
 
     assert "XN$£" not in captured.out, "logger initially writing to stdout"
     assert "YYXX" in captured.out, "root is not writing to stdout"
-    assert (
-        "PQ&*" not in captured.out
-    ), "logger writing to stdout through root handler"
+    assert "PQ&*" not in captured.out, (
+        "logger writing to stdout through root handler"
+    )
