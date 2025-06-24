@@ -28,8 +28,7 @@ def test_start_logging(tmp_path):
 
 
 def test_logger_name(tmp_path):
-    """
-    Quick check that expecter logger name is created
+    """Quick check that expecter logger name is created
     when specified.
     """
     logger_name = "hello_world"
@@ -44,8 +43,7 @@ def test_logger_name(tmp_path):
 
 
 def test_assert_named_logger_with_multiprocessing(tmp_path):
-    """
-    Test an error is raised if trying to use multiprocess
+    """Test an error is raised if trying to use multiprocess
     logging with a named logger.
     """
     with pytest.raises(ValueError) as e:
@@ -60,8 +58,7 @@ def test_assert_named_logger_with_multiprocessing(tmp_path):
 
 
 def test_logging_to_console(tmp_path, capsys):
-    """
-    Check that logs are written to stdout when
+    """Check that logs are written to stdout when
     `log_to_console` is `True`.
     """
     logger_name = "hello_world"
@@ -80,8 +77,7 @@ def test_logging_to_console(tmp_path, capsys):
 
 
 def test_correct_handlers_are_set(tmp_path):
-    """
-    Test the handlers on the logger are as specified by the
+    """Test the handlers on the logger are as specified by the
     `start_logging` call. Note this cannot be tested
     on the root logger has it holds handlers that
     were assigned in earlier tests.
@@ -140,8 +136,7 @@ def test_correct_handlers_are_set(tmp_path):
 
 
 def test_handlers_are_refreshed(tmp_path):
-    """
-    When a named logger is requested, the handlers
+    """When a named logger is requested, the handlers
     are reset to that handlers assigned on previous
     calls are not carried over to the most recent call.
     """
@@ -181,8 +176,7 @@ def test_handlers_are_refreshed(tmp_path):
 
 
 def test_named_logger_doesnt_propagate(tmp_path, capsys):
-    """
-    By default, named loggers will propagate through
+    """By default, named loggers will propagate through
     parent handlers. Root is always parent to named loggers.
     This means that named logger can still print to console
     through the root StreamHandler unless `propagate` is set

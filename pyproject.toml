@@ -85,6 +85,15 @@ select = [
   "B",   # flake8 bugbear
   "SIM", # flake8 simplify
   "C90", # McCabe complexity
+  "D"    # pydocstyle
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+  "D"    # pydocstyle
+]
+"example.py" = [
+  "D"    # pydocstyle
 ]
 
 [tool.ruff.format]
