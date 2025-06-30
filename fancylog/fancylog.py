@@ -126,7 +126,6 @@ class LoggingHeader:
     def __init__(
         self,
         file,
-        program,  # TODO: should this be called package?
         variable_objects,
         output_dir,
         write_header=True,
