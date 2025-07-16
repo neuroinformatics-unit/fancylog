@@ -126,7 +126,7 @@ class LoggingHeader:
     def __init__(
         self,
         file,
-        program,
+        package,
         variable_objects,
         output_dir,
         write_header=True,
@@ -139,13 +139,13 @@ class LoggingHeader:
 
         See start_logging() for parameters.
         """
-        self.program = program
+        self.package = package
 
         with open(file, "w", encoding="utf-8") as self.file:
             if write_header:
                 self.write_log_header(output_dir, log_header)
             if write_git:
-                self.write_git_info(self.program.__name__)
+                self.write_git_info(self.package.__name__)
             if write_cli_args:
                 self.write_command_line_arguments()
             if write_variables and variable_objects:
@@ -274,7 +274,7 @@ class LoggingHeader:
         self.file.write("Output directory: " + output_dir + "\n")
         self.file.write("Current directory: " + os.getcwd() + "\n")
         with contextlib.suppress(AttributeError):
-            self.file.write(f"Version: {self.program.__version__}")
+            self.file.write(f"Version: {self.package.__version__}")
 
     def write_separated_section_header(
         self,
