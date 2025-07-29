@@ -1,4 +1,5 @@
 import logging
+import platform
 
 import pytest
 from rich.logging import RichHandler
@@ -206,3 +207,41 @@ def test_named_logger_doesnt_propagate(tmp_path, capsys):
     assert "PQ&*" not in captured.out, (
         "logger writing to stdout through root handler"
     )
+
+
+def test_correct_python_version_header(tmp_path):
+    """Python version section should exist only if
+    logger is created with the parameter write_python_version as True.
+    """
+
+    ver_header = f"{lateral_separator}  PYTHON VERSION  {lateral_separator}\n"
+
+    fancylog.start_logging(tmp_path, fancylog, write_python_version=False)
+
+    log_file = next(tmp_path.glob("*.log"))
+
+    # Test header missing when write_python_version set to False
+    with open(log_file) as file:
+        assert ver_header not in file.read()
+
+    fancylog.start_logging(tmp_path, fancylog, write_python_version=True)
+
+    log_file = next(tmp_path.glob("*.log"))
+
+    # Test header present when write_python_version set to True
+    with open(log_file) as file:
+        assert ver_header in file.read()
+
+
+def test_correct_python_version_logged(tmp_path):
+    """Python version logged should be equal to
+    the output of platform.python_version().
+    """
+
+    fancylog.start_logging(tmp_path, fancylog, write_python_version=True)
+
+    log_file = next(tmp_path.glob("*.log"))
+
+    # Test logged python version is equal to platform.python_version()
+    with open(log_file) as file:
+        assert f"Python version: {platform.python_version()}" in file.read()

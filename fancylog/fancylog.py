@@ -28,6 +28,7 @@ def start_logging(
     write_header=True,
     write_git=True,
     write_cli_args=True,
+    write_python_version=True,
     write_variables=True,
     log_to_file=True,
     log_to_console=True,
@@ -62,6 +63,8 @@ def start_logging(
         Write information about the git repository. Default: True
     write_cli_args
         Log the command-line arguments. Default: True
+    write_python_version
+        Log the Python version. Default: True
     write_variables
         Write the attributes of selected objects. Default: True
     log_to_file
@@ -105,6 +108,7 @@ def start_logging(
             write_header=write_header,
             write_git=write_git,
             write_cli_args=write_cli_args,
+            write_python_version=write_python_version,
             write_variables=write_variables,
             log_header=log_header,
         )
@@ -132,6 +136,7 @@ class LoggingHeader:
         write_header=True,
         write_git=True,
         write_cli_args=True,
+        write_python_version=True,
         write_variables=True,
         log_header=None,
     ):
@@ -148,6 +153,8 @@ class LoggingHeader:
                 self.write_git_info(self.program.__name__)
             if write_cli_args:
                 self.write_command_line_arguments()
+            if write_python_version:
+                self.write_python_version()
             if write_variables and variable_objects:
                 self.write_variables(variable_objects)
 
@@ -205,6 +212,18 @@ class LoggingHeader:
         self.write_separated_section_header(header)
         self.file.write(f"Command: {sys.argv[0]} \n")
         self.file.write(f"Input arguments: {sys.argv[1:]}")
+
+    def write_python_version(self, header="PYTHON VERSION"):
+        """Write the Python version used to run the script.
+
+        Parameters
+        ----------
+        header
+            Title of the section that will be written to the log file.
+
+        """
+        self.write_separated_section_header(header)
+        self.file.write(f"Python version: {sys.version.split()[0]}")
 
     def write_variables(self, variable_objects):
         """Write a section for variables with their values.
