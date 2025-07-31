@@ -1,5 +1,10 @@
+import json
 import logging
+import os
 import platform
+import subprocess
+import sys
+from importlib.metadata import distributions
 
 import pytest
 from rich.logging import RichHandler
@@ -209,26 +214,32 @@ def test_named_logger_doesnt_propagate(tmp_path, capsys):
     )
 
 
-def test_correct_python_version_header(tmp_path):
-    """Python version section should exist only if
-    logger is created with the parameter write_python_version as True.
+def test_python_version_header_absent(tmp_path):
+    """Python version section does not exist if logger
+    is created with the parameter write_python_version as False.
     """
-
     ver_header = f"{lateral_separator}  PYTHON VERSION  {lateral_separator}\n"
 
-    fancylog.start_logging(tmp_path, fancylog, write_python_version=False)
+    fancylog.start_logging(tmp_path, fancylog, write_python=False)
 
     log_file = next(tmp_path.glob("*.log"))
 
-    # Test header missing when write_python_version set to False
+    # Test header missing when write_python set to False
     with open(log_file) as file:
         assert ver_header not in file.read()
 
-    fancylog.start_logging(tmp_path, fancylog, write_python_version=True)
+
+def test_python_version_header_present(tmp_path):
+    """Python version section exists if logger
+    is created with the parameter write_python_version as True.
+    """
+    ver_header = f"{lateral_separator}  PYTHON VERSION  {lateral_separator}\n"
+
+    fancylog.start_logging(tmp_path, fancylog, write_python=True)
 
     log_file = next(tmp_path.glob("*.log"))
 
-    # Test header present when write_python_version set to True
+    # Test header present when write_python set to True
     with open(log_file) as file:
         assert ver_header in file.read()
 
@@ -238,10 +249,79 @@ def test_correct_python_version_logged(tmp_path):
     the output of platform.python_version().
     """
 
-    fancylog.start_logging(tmp_path, fancylog, write_python_version=True)
+    fancylog.start_logging(tmp_path, fancylog, write_python=True)
 
     log_file = next(tmp_path.glob("*.log"))
 
     # Test logged python version is equal to platform.python_version()
     with open(log_file) as file:
         assert f"Python version: {platform.python_version()}" in file.read()
+
+
+def test_environment_header_absent(tmp_path):
+    """Environment section does not exist if logger
+    is created with the parameter write_env_packages as False.
+    """
+    env_header = f"{lateral_separator}  ENVIRONMENT  {lateral_separator}\n"
+
+    fancylog.start_logging(tmp_path, fancylog, write_env_packages=False)
+
+    log_file = next(tmp_path.glob("*.log"))
+
+    # Test header missing when write_env_packages set to False
+    with open(log_file) as file:
+        assert env_header not in file.read()
+
+
+def test_environment_header_present(tmp_path):
+    """Environment section exists if logger
+    is created with the parameter write_env_packages as True.
+    """
+    env_header = f"{lateral_separator}  ENVIRONMENT  {lateral_separator}\n"
+
+    fancylog.start_logging(tmp_path, fancylog, write_env_packages=True)
+
+    log_file = next(tmp_path.glob("*.log"))
+
+    # Test header present when write_env_packages set to True
+    with open(log_file) as file:
+        assert env_header in file.read()
+
+
+def test_correct_pkg_version_logged(tmp_path):
+    """Package versions logged should be equal to
+    the output of `conda list` or `pip list`.
+    """
+    fancylog.start_logging(tmp_path, fancylog, write_env_packages=True)
+
+    log_file = next(tmp_path.glob("*.log"))
+
+    try:
+        # If there is a conda environment, assert that the correct
+        # version is logged for all pkgs
+        conda_exe = os.environ["CONDA_EXE"]
+        conda_list = subprocess.run(
+            [conda_exe, "list", "--json"], capture_output=True, text=True
+        )
+
+        conda_pkgs = json.loads(conda_list.stdout)
+        for pkg in conda_pkgs:
+            assert f"{pkg['name']:20} {pkg['version']:15}\n"
+
+    except KeyError:
+        # If there is no conda environment, assert that the correct
+        # version is logged for all packages logged with pip list
+        with open(log_file) as file:
+            file_content = file.read()
+
+            # Test local environment versions
+            local_site_packages = next(
+                p for p in sys.path if "site-packages" in p
+            )
+
+            for dist in distributions():
+                if str(dist.locate_file("")).startswith(local_site_packages):
+                    assert (
+                        f"{dist.metadata['Name']:20} {dist.version}"
+                        in file_content
+                    )
