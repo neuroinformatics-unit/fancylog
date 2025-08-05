@@ -69,7 +69,7 @@ def start_logging(
     write_python
         Log the Python version. Default: True
     write_env_packages
-        Log the packages in the conda/pip environment. Default: True
+        Log the packages in the environment. Default: True
     write_variables
         Write the attributes of selected objects. Default: True
     log_to_file
@@ -256,58 +256,70 @@ class LoggingHeader:
                 [conda_exe, "list", "--json"], capture_output=True, text=True
             )
 
-            conda_pkgs = json.loads(conda_list.stdout)
+            env_pkgs = json.loads(conda_list.stdout)
 
             self.file.write(f"Conda environment: {conda_env}\n\n")
             self.file.write("Environment packages (conda):\n")
-            self.file.write(f"{'Name':20} {'Version':15}\n")
-            for pkg in conda_pkgs:
-                self.file.write(f"{pkg['name']:20} {pkg['version']:15}\n")
+            self.write_packages(env_pkgs)
 
         # If no conda env, fall back to logging pip
         except KeyError:
-            # Log local-available packages first
             python_executable = sys.executable
-            local_pip_list = subprocess.run(
+            pip_list = subprocess.run(
                 [
                     python_executable,
                     "-m",
                     "pip",
                     "list",
-                    "--local",
+                    "--verbose",
                     "--format=json",
                 ],
                 capture_output=True,
                 text=True,
             )
 
-            local_env_pkgs = json.loads(local_pip_list.stdout)
-            local_env_pkgs_names = []
+            all_pkgs = json.loads(pip_list.stdout)
 
-            self.file.write(
-                "No conda environment found, reporting pip packages\n\n"
-            )
-            self.file.write("Local environment packages (pip):\n")
-            self.file.write(f"{'Name':20} {'Version':15}\n")
-            for pkg in local_env_pkgs:
-                local_env_pkgs_names.append(pkg["name"])
-                self.file.write(f"{pkg['name']:20} {pkg['version']:15}\n")
-            self.file.write("\n")
+            try:
+                # If there is a local env, log local packages first
+                env_pkgs = [
+                    pkg
+                    for pkg in all_pkgs
+                    if os.getenv("VIRTUAL_ENV") in pkg["location"]
+                ]
 
-            # Log global-available packages (if any)
-            global_pip_list = subprocess.run(
-                [python_executable, "-m", "pip", "list", "--format=json"],
-                capture_output=True,
-                text=True,
-            )
+                self.file.write(
+                    "No conda environment found, reporting pip packages\n\n"
+                )
+                self.file.write("Local environment packages (pip):\n")
+                self.write_packages(env_pkgs)
+                self.file.write("\n")
 
-            global_env_pkgs = json.loads(global_pip_list.stdout)
+                # Log global-available packages (if any)
+                global_pkgs = [pkg for pkg in all_pkgs if pkg not in env_pkgs]
 
-            self.file.write("Global environment packages (pip):\n")
-            self.file.write(f"{'Name':20} {'Version':15}\n")
-            for pkg in global_env_pkgs:
-                if pkg["name"] not in local_env_pkgs_names:
-                    self.file.write(f"{pkg['name']:20} {pkg['version']:15}\n")
+                self.file.write("Global environment packages (pip):\n")
+                self.write_packages(global_pkgs)
+
+            except TypeError:
+                self.file.write(
+                    "No environment found, reporting global pip packages\n\n"
+                )
+                self.write_packages(all_pkgs)
+
+    def write_packages(self, env_pkgs):
+        """Write the packages in the local environment.
+
+        Parameters
+        ----------
+        env_pkgs
+            A dictionary of environment packages, the name and version
+            of which will be written.
+
+        """
+        self.file.write(f"{'Name':20} {'Version':15}\n")
+        for pkg in env_pkgs:
+            self.file.write(f"{pkg['name']:20} {pkg['version']:15}\n")
 
     def write_variables(self, variable_objects):
         """Write a section for variables with their values.
