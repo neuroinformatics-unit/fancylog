@@ -1,8 +1,10 @@
 """Wrapper around the standard logging module, with additional information."""
 
 import contextlib
+import json
 import logging
 import os
+import subprocess
 import sys
 from datetime import datetime
 from importlib.util import find_spec
@@ -28,6 +30,8 @@ def start_logging(
     write_header=True,
     write_git=True,
     write_cli_args=True,
+    write_python=True,
+    write_env_packages=True,
     write_variables=True,
     log_to_file=True,
     log_to_console=True,
@@ -62,6 +66,10 @@ def start_logging(
         Write information about the git repository. Default: True
     write_cli_args
         Log the command-line arguments. Default: True
+    write_python
+        Log the Python version. Default: True
+    write_env_packages
+        Log the packages in the environment. Default: True
     write_variables
         Write the attributes of selected objects. Default: True
     log_to_file
@@ -105,6 +113,8 @@ def start_logging(
             write_header=write_header,
             write_git=write_git,
             write_cli_args=write_cli_args,
+            write_python=write_python,
+            write_env_packages=write_env_packages,
             write_variables=write_variables,
             log_header=log_header,
         )
@@ -132,6 +142,8 @@ class LoggingHeader:
         write_header=True,
         write_git=True,
         write_cli_args=True,
+        write_python=True,
+        write_env_packages=True,
         write_variables=True,
         log_header=None,
     ):
@@ -148,6 +160,10 @@ class LoggingHeader:
                 self.write_git_info(self.program.__name__)
             if write_cli_args:
                 self.write_command_line_arguments()
+            if write_python:
+                self.write_python_version()
+            if write_env_packages:
+                self.write_environment_packages()
             if write_variables and variable_objects:
                 self.write_variables(variable_objects)
 
@@ -205,6 +221,105 @@ class LoggingHeader:
         self.write_separated_section_header(header)
         self.file.write(f"Command: {sys.argv[0]} \n")
         self.file.write(f"Input arguments: {sys.argv[1:]}")
+
+    def write_python_version(self, header="PYTHON VERSION"):
+        """Write the Python version used to run the script.
+
+        Parameters
+        ----------
+        header
+            Title of the section that will be written to the log file.
+
+        """
+        self.write_separated_section_header(header)
+        self.file.write(f"Python version: {sys.version.split()[0]}")
+
+    def write_environment_packages(self, header="ENVIRONMENT"):
+        """Write the local/global environment packages used to run the script.
+
+        Attempt to collect conda packages and, if this fails,
+        collect pip packages.
+
+        Parameters
+        ----------
+        header
+            Title of the section that will be written to the log file
+
+        """
+        self.write_separated_section_header(header)
+
+        # Attempt to log conda env name and packages
+        try:
+            conda_env = os.environ["CONDA_PREFIX"].split(os.sep)[-1]
+            conda_exe = os.environ["CONDA_EXE"]
+            conda_list = subprocess.run(
+                [conda_exe, "list", "--json"], capture_output=True, text=True
+            )
+
+            env_pkgs = json.loads(conda_list.stdout)
+
+            self.file.write(f"Conda environment: {conda_env}\n\n")
+            self.file.write("Environment packages (conda):\n")
+            self.write_packages(env_pkgs)
+
+        # If no conda env, fall back to logging pip
+        except KeyError:
+            python_executable = sys.executable
+            pip_list = subprocess.run(
+                [
+                    python_executable,
+                    "-m",
+                    "pip",
+                    "list",
+                    "--verbose",
+                    "--format=json",
+                ],
+                capture_output=True,
+                text=True,
+            )
+
+            all_pkgs = json.loads(pip_list.stdout)
+
+            try:
+                # If there is a local env, log local packages first
+                env_pkgs = [
+                    pkg
+                    for pkg in all_pkgs
+                    if os.getenv("VIRTUAL_ENV") in pkg["location"]
+                ]
+
+                self.file.write(
+                    "No conda environment found, reporting pip packages\n\n"
+                )
+                self.file.write("Local environment packages (pip):\n")
+                self.write_packages(env_pkgs)
+                self.file.write("\n")
+
+                # Log global-available packages (if any)
+                global_pkgs = [pkg for pkg in all_pkgs if pkg not in env_pkgs]
+
+                self.file.write("Global environment packages (pip):\n")
+                self.write_packages(global_pkgs)
+
+            except TypeError:
+                self.file.write(
+                    "No environment found, reporting global pip packages\n\n"
+                )
+                self.write_packages(all_pkgs)
+
+    def write_packages(self, env_pkgs):
+        """Write the packages in the local environment.
+
+        Parameters
+        ----------
+        env_pkgs
+            A dictionary of environment packages, the name and version
+            of which will be written.
+
+        """
+        self.file.write(f"{'Name':20} {'Version':15}\n")
+        for pkg in env_pkgs:
+            self.file.write(f"{pkg['name']:20} {pkg['version']:15}\n")
 
     def write_variables(self, variable_objects):
         """Write a section for variables with their values.
