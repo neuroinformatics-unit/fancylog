@@ -297,7 +297,7 @@ def test_mock_pip_pkgs(tmp_path):
     and test that packages are logged correctly.
     """
 
-    # Simulated `conda list --json` output
+    # Simulated `pip list --json` output
     fake_pip_output = json.dumps(
         [
             {"name": "fancylog", "version": "1.1.1", "location": "fake_env"},
@@ -312,7 +312,7 @@ def test_mock_pip_pkgs(tmp_path):
         patch("subprocess.run") as mock_run,
     ):
         # Eliminate conda environment packages triggers logging pip list
-        (os.environ.pop("CONDA_PREFIX", None),)
+        os.environ.pop("CONDA_PREFIX", None)
         os.environ.pop("CONDA_EXE", None)
 
         mock_getenv.return_value = "fake_env"
@@ -378,5 +378,50 @@ def test_mock_conda_pkgs(tmp_path):
 
             assert "Conda environment:" in file_content
             assert "Environment packages (conda):" in file_content
+            assert f"{'fancylog':20} {'1.1.1'}"
+            assert f"{'pytest':20} {'1.1.1'}"
+
+
+def test_mock_no_environment(tmp_path):
+    """Mock lack of any environment,
+    and test that packages are logged correctly.
+    """
+
+    # Simulated `pip list --json` output
+    fake_pip_output = json.dumps(
+        [
+            {"name": "fancylog", "version": "1.1.1", "location": "fake_env"},
+            {"name": "pytest", "version": "1.1.1", "location": "global_env"},
+        ]
+    )
+
+    # Patch the environment and subprocess
+    with (
+        patch.dict(os.environ, {}, clear=False),
+        patch("os.getenv") as mock_getenv,
+        patch("subprocess.run") as mock_run,
+    ):
+        # Eliminate conda environment packages triggers logging pip list
+        os.environ.pop("CONDA_PREFIX", None)
+        os.environ.pop("CONDA_EXE", None)
+
+        # Mock lack of any local environment
+        mock_getenv.return_value = None
+
+        # Mocked subprocess result
+        mock_run.return_value = MagicMock(stdout=fake_pip_output, returncode=0)
+
+        fancylog.start_logging(tmp_path, fancylog, write_env_packages=True)
+
+        log_file = next(tmp_path.glob("*.log"))
+
+        # Log contains conda subheaders and mocked pkgs versions
+        with open(log_file) as file:
+            file_content = file.read()
+
+            assert (
+                "No environment found, reporting global pip packages"
+            ) in file_content
+
             assert f"{'fancylog':20} {'1.1.1'}"
             assert f"{'pytest':20} {'1.1.1'}"
