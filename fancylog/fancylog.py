@@ -8,7 +8,10 @@ import subprocess
 import sys
 from datetime import datetime
 from importlib.util import find_spec
+from pathlib import Path
 
+import numpy as np
+from PIL import Image
 from rich.logging import RichHandler
 
 from fancylog.tools.git import (
@@ -574,3 +577,62 @@ def disable_logging():
     no argument doesn't work.
     """
     logging.disable(2**63 - 1)
+
+
+def log_image(
+    image: np.ndarray,
+    name: str,
+    logging_dir: str,
+    subfolder: str = "media/images",
+    metadata: dict | None = None,
+):
+    """Save an image to the logging dir and record its path in the log."""
+    output_dir = Path(logging_dir)
+    image_dir = output_dir / subfolder
+    image_dir.mkdir(parents=True, exist_ok=True)
+
+    if image.dtype != np.uint8:
+        image = ((image - image.min()) / (np.ptp(image) + 1e-5) * 255).astype(
+            np.uint8
+        )
+
+    filepath = image_dir / f"{name}.tiff"
+    Image.fromarray(image).save(filepath, format="TIFF")
+
+    if metadata:
+        meta_path = image_dir / f"{name}_meta.json"
+        with open(meta_path, "w") as f:
+            json.dump(metadata, f, indent=2)
+
+    logging.getLogger(__name__).info(
+        f"[fancylog] Saved image: {filepath.relative_to(output_dir)}"
+    )
+    return filepath
+
+
+def log_data_object(
+    data,
+    name: str,
+    logging_dir: str,
+    subfolder: str = "media/data",
+    ext: str = "json",
+):
+    """Save structured data (e.g., dict, list, numpy array) to disk."""
+    output_dir = Path(logging_dir)
+    data_dir = output_dir / subfolder
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    path = data_dir / f"{name}.{ext}"
+
+    if isinstance(data, (dict | list)):
+        with open(path, "w") as f:
+            json.dump(data, f, indent=2)
+    elif isinstance(data, np.ndarray):
+        np.save(path, data)
+    else:
+        raise ValueError("Unsupported data type for logging")
+
+    logging.getLogger(__name__).info(
+        f"[fancylog] Saved data object: {path.relative_to(output_dir)}"
+    )
+    return path
