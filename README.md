@@ -5,6 +5,7 @@
 [![Development Status](https://img.shields.io/pypi/status/fancylog.svg)](https://github.com/neuroinformatics-unit/fancylog)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 [![Contributions](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg)](https://github.com/neuroinformatics-unit/fancylog)
+[![codecov](https://codecov.io/gh/neuroinformatics-unit/fancylog/graph/badge.svg?token=5VJ0SM7S4W)](https://codecov.io/gh/neuroinformatics-unit/fancylog)
 
 # fancylog
 Fancier logging with python.
