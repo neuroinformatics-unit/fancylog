@@ -11,7 +11,7 @@ from importlib.util import find_spec
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+import tifffile
 from rich.logging import RichHandler
 
 from fancylog.tools.git import (
@@ -591,22 +591,15 @@ def log_image(
     image_dir = output_dir / subfolder
     image_dir.mkdir(parents=True, exist_ok=True)
 
-    if image.dtype != np.uint8:
-        image = ((image - image.min()) / (np.ptp(image) + 1e-5) * 255).astype(
-            np.uint8
-        )
-
     filepath = image_dir / f"{name}.tiff"
-    Image.fromarray(image).save(filepath, format="TIFF")
+    tifffile.imwrite(filepath, image)
 
     if metadata:
         meta_path = image_dir / f"{name}_meta.json"
         with open(meta_path, "w") as f:
             json.dump(metadata, f, indent=2)
 
-    logging.getLogger(__name__).info(
-        f"[fancylog] Saved image: {filepath.relative_to(output_dir)}"
-    )
+    logging.getLogger(__name__).info(f"[fancylog] Saved image: {filepath}")
     return filepath
 
 
@@ -622,17 +615,17 @@ def log_data_object(
     data_dir = output_dir / subfolder
     data_dir.mkdir(parents=True, exist_ok=True)
 
-    path = data_dir / f"{name}.{ext}"
+    filepath = data_dir / f"{name}.{ext}"
 
     if isinstance(data, (dict | list)):
-        with open(path, "w") as f:
+        with open(filepath, "w") as f:
             json.dump(data, f, indent=2)
     elif isinstance(data, np.ndarray):
-        np.save(path, data)
+        np.save(filepath, data)
     else:
         raise ValueError("Unsupported data type for logging")
 
     logging.getLogger(__name__).info(
-        f"[fancylog] Saved data object: {path.relative_to(output_dir)}"
+        f"[fancylog] Saved data object: {filepath}"
     )
-    return path
+    return filepath
