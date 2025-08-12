@@ -6,4 +6,8 @@ except PackageNotFoundError:
     # package is not installed
     pass
 
-from fancylog.fancylog import start_logging
+from fancylog.fancylog import (
+    start_logging,
+    log_image,
+    log_data_object,
+)
