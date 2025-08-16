@@ -40,6 +40,8 @@ dev = [
 
 git = ["gitpython"]
 
+multiprocessing = ["multiprocessing-logging"]
+
 [build-system]
 requires = [
     "setuptools>=45",

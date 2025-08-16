@@ -32,6 +32,10 @@ installed. The latter can be installed along with `fancylog` using:
 pip install fancylog[git]
 ```
 
+```bash
+pip install fancylog[multiprocessing]
+```
+
 #### To run example
 ```bash
 git clone https://github.com/neuroinformatics-unit/fancylog
