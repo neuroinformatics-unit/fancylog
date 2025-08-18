@@ -579,16 +579,42 @@ def disable_logging():
     logging.disable(2**63 - 1)
 
 
+def get_default_logging_dir() -> Path | None:
+    """Infer the logging directory from the active logger's FileHandler."""
+    logger = logging.getLogger()  # root logger
+    for handler in logger.handlers:
+        if hasattr(handler, "baseFilename"):  # FileHandler
+            return Path(handler.baseFilename).parent
+    return None
+
+
+# Cache a run-level timestamp so all images go in the same folder
+_RUN_TIMESTAMP = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+
 def log_image(
     image: np.ndarray,
     name: str,
-    logging_dir: str,
-    subfolder: str = "media/images",
+    logging_dir: str | Path | None = None,
+    subfolder: str | None = None,
     metadata: dict | None = None,
 ):
     """Save an image to the logging dir and record its path in the log."""
+    if logging_dir is None:
+        logging_dir = get_default_logging_dir()
+        if logging_dir is None:
+            raise ValueError(
+                "Could not infer logging directory from active logger. "
+                "Please provide logging_dir explicitly."
+            )
+
     output_dir = Path(logging_dir)
-    image_dir = output_dir / subfolder
+    if subfolder:
+        image_dir = (
+            output_dir / "media" / "images" / _RUN_TIMESTAMP / subfolder
+        )
+    else:
+        image_dir = output_dir / "media" / "images" / _RUN_TIMESTAMP
     image_dir.mkdir(parents=True, exist_ok=True)
 
     filepath = image_dir / f"{name}.tiff"
@@ -606,13 +632,24 @@ def log_image(
 def log_data_object(
     data,
     name: str,
-    logging_dir: str,
-    subfolder: str = "media/data",
+    logging_dir: str | Path | None = None,
+    subfolder: str | None = None,
     ext: str = "json",
 ):
     """Save structured data (e.g., dict, list, numpy array) to disk."""
+    if logging_dir is None:
+        logging_dir = get_default_logging_dir()
+        if logging_dir is None:
+            raise ValueError(
+                "Could not infer logging directory from active logger. "
+                "Please provide logging_dir explicitly."
+            )
+
     output_dir = Path(logging_dir)
-    data_dir = output_dir / subfolder
+    if subfolder:
+        data_dir = output_dir / "media" / "data" / _RUN_TIMESTAMP / subfolder
+    else:
+        data_dir = output_dir / "media" / "data" / _RUN_TIMESTAMP
     data_dir.mkdir(parents=True, exist_ok=True)
 
     filepath = data_dir / f"{name}.{ext}"

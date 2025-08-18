@@ -40,6 +40,11 @@ dev = [
 
 git = ["gitpython"]
 
+image = [
+    "numpy",
+    "tifffile",
+]
+
 [build-system]
 requires = [
     "setuptools>=45",
