@@ -40,7 +40,7 @@ dev = [
 
 git = ["gitpython"]
 
-multiprocessing = ["multiprocessing_logging"]
+multiprocessing = ["multiprocessing-logging"]
 
 [build-system]
 requires = [
