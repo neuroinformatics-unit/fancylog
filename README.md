@@ -33,7 +33,7 @@ installed. The latter can be installed along with `fancylog` using:
 pip install fancylog[git]
 ```
 
-To enable logging when using the multiprocessing module, install the extra:
+To enable logging when using the multiprocessing module, install using:
 
 ```bash
 pip install fancylog[multiprocessing]
