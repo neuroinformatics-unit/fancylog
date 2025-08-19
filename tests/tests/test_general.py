@@ -7,7 +7,9 @@ import sys
 from importlib.metadata import distributions
 from unittest.mock import MagicMock, patch
 
+import numpy as np
 import pytest
+import tifffile
 from rich.logging import RichHandler
 
 import fancylog
@@ -425,3 +427,151 @@ def test_mock_no_environment(tmp_path):
 
             assert f"{'fancylog':20} {'1.1.1'}"
             assert f"{'pytest':20} {'1.1.1'}"
+
+
+def test_log_image_creates_tiff_and_metadata(tmp_path, caplog):
+    """Test that log_image writes a TIFF
+    and optional metadata file.
+    """
+
+    img = np.random.randint(0, 255, (5, 5))
+
+    with caplog.at_level(logging.INFO):
+        filepath = fancylog.log_image(
+            img,
+            name="test_img",
+            logging_dir=tmp_path,
+            metadata={"desc": "test image"},
+        )
+
+    assert filepath.exists()
+    assert filepath.suffix == ".tiff"
+
+    loaded_img = tifffile.imread(filepath)
+    np.testing.assert_array_equal(img, loaded_img)
+
+    # Check metadata file
+    meta_file = filepath.with_name("test_img_meta.json")
+    assert meta_file.exists()
+    with open(meta_file) as f:
+        meta = json.load(f)
+    assert meta["desc"] == "test image"
+
+    # Check log output
+    assert any(
+        "[fancylog] Saved image:" in message for message in caplog.messages
+    )
+
+
+def test_log_image_without_metadata(tmp_path, caplog):
+    """Test that log_image works without metadata."""
+
+    img = np.zeros((3, 3))
+    with caplog.at_level(logging.INFO):
+        filepath = fancylog.log_image(img, "no_meta", tmp_path)
+
+    assert filepath.exists()
+
+    # Ensure no metadata file
+    meta_file = filepath.with_name("no_meta_meta.json")
+    assert not meta_file.exists()
+
+    assert any(
+        "[fancylog] Saved image:" in message for message in caplog.messages
+    )
+
+
+def test_log_data_object_dict_and_list(tmp_path, caplog):
+    """Test logging of dict and list objects."""
+
+    data_dict = {"a": 1}
+    with caplog.at_level(logging.INFO):
+        filepath_dict = fancylog.log_data_object(data_dict, "mydict", tmp_path)
+
+    assert filepath_dict.exists()
+
+    with open(filepath_dict) as f:
+        loaded = json.load(f)
+    assert loaded == data_dict
+
+    data_list = [1, 2, 3]
+
+    with caplog.at_level(logging.INFO):
+        filepath_list = fancylog.log_data_object(data_list, "mylist", tmp_path)
+
+    with open(filepath_list) as f:
+        loaded = json.load(f)
+    assert loaded == data_list
+
+    assert any(
+        "[fancylog] Saved data object:" in message
+        for message in caplog.messages
+    )
+
+
+def test_log_data_object_numpy_array(tmp_path):
+    """Test logging of numpy array."""
+
+    arr = np.array([[1, 2], [3, 4]])
+    filepath = fancylog.log_data_object(arr, "array", tmp_path, ext="npy")
+
+    assert filepath.exists()
+    loaded = np.load(filepath)
+    np.testing.assert_array_equal(arr, loaded)
+
+
+def test_log_data_object_invalid_type(tmp_path):
+    """Test that unsupported types raise ValueError."""
+
+    with pytest.raises(ValueError):
+        fancylog.log_data_object("not supported", "bad", tmp_path)
+
+
+def test_get_default_logging_dir_returns_none(monkeypatch):
+    """Ensure get_default_logging_dir returns None with no FileHandler."""
+    logger = logging.getLogger()
+    # Temporarily clear handlers
+    old_handlers = logger.handlers[:]
+    logger.handlers = []
+
+    try:
+        assert fancylog.get_default_logging_dir() is None
+    finally:
+        logger.handlers = old_handlers
+
+
+def test_log_image_raises_without_inferable_dir(monkeypatch):
+    """Covers ValueError when logging_dir=None and no FileHandler."""
+    logger = logging.getLogger()
+    old_handlers = logger.handlers[:]
+    logger.handlers = []
+
+    try:
+        with pytest.raises(
+            ValueError, match="Could not infer logging directory"
+        ):
+            fancylog.log_image(np.zeros((2, 2)), "fail")
+    finally:
+        logger.handlers = old_handlers
+
+
+def test_log_image_with_subfolder(tmp_path):
+    """Covers subfolder branch in log_image."""
+    img = np.ones((2, 2))
+    filepath = fancylog.log_image(
+        img, "with_sub", tmp_path, subfolder="nested"
+    )
+    assert "nested" in str(filepath)
+    assert filepath.exists()
+
+
+def test_log_data_object_with_subfolder(tmp_path):
+    """Covers subfolder branch in log_data_object."""
+    arr = np.array([1, 2, 3])
+    filepath = fancylog.log_data_object(
+        arr, "with_sub", tmp_path, subfolder="nested", ext="npy"
+    )
+    assert "nested" in str(filepath)
+    assert filepath.exists()
+    loaded = np.load(filepath)
+    np.testing.assert_array_equal(arr, loaded)

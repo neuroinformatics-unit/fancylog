@@ -40,6 +40,11 @@ dev = [
 
 git = ["gitpython"]
 
+image = [
+    "numpy",
+    "tifffile",
+]
+
 multiprocessing = ["multiprocessing-logging"]
 
 [build-system]
@@ -118,6 +123,7 @@ python =
 [testenv]
 extras =
     dev
+    image
 commands =
     pytest -v --color=yes --cov=fancylog --cov-report=xml
 """
