@@ -20,6 +20,7 @@ to log information about the git environment.
 
 
 #### To install
+
 ```bash
 pip install fancylog
 ```
@@ -30,6 +31,12 @@ installed. The latter can be installed along with `fancylog` using:
 
 ```bash
 pip install fancylog[git]
+```
+
+To enable logging when using the multiprocessing module, install using:
+
+```bash
+pip install fancylog[multiprocessing]
 ```
 
 #### To run example
