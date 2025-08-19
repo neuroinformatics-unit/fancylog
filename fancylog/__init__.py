@@ -8,6 +8,7 @@ except PackageNotFoundError:
 
 from fancylog.fancylog import (
     start_logging,
+    get_default_logging_dir,
     log_image,
     log_data_object,
 )

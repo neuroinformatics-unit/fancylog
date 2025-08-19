@@ -525,3 +525,53 @@ def test_log_data_object_invalid_type(tmp_path):
 
     with pytest.raises(ValueError):
         fancylog.log_data_object("not supported", "bad", tmp_path)
+
+
+def test_get_default_logging_dir_returns_none(monkeypatch):
+    """Ensure get_default_logging_dir returns None with no FileHandler."""
+    logger = logging.getLogger()
+    # Temporarily clear handlers
+    old_handlers = logger.handlers[:]
+    logger.handlers = []
+
+    try:
+        assert fancylog.get_default_logging_dir() is None
+    finally:
+        logger.handlers = old_handlers
+
+
+def test_log_image_raises_without_inferable_dir(monkeypatch):
+    """Covers ValueError when logging_dir=None and no FileHandler."""
+    logger = logging.getLogger()
+    old_handlers = logger.handlers[:]
+    logger.handlers = []
+
+    try:
+        with pytest.raises(
+            ValueError, match="Could not infer logging directory"
+        ):
+            fancylog.log_image(np.zeros((2, 2)), "fail")
+    finally:
+        logger.handlers = old_handlers
+
+
+def test_log_image_with_subfolder(tmp_path):
+    """Covers subfolder branch in log_image."""
+    img = np.ones((2, 2))
+    filepath = fancylog.log_image(
+        img, "with_sub", tmp_path, subfolder="nested"
+    )
+    assert "nested" in str(filepath)
+    assert filepath.exists()
+
+
+def test_log_data_object_with_subfolder(tmp_path):
+    """Covers subfolder branch in log_data_object."""
+    arr = np.array([1, 2, 3])
+    filepath = fancylog.log_data_object(
+        arr, "with_sub", tmp_path, subfolder="nested", ext="npy"
+    )
+    assert "nested" in str(filepath)
+    assert filepath.exists()
+    loaded = np.load(filepath)
+    np.testing.assert_array_equal(arr, loaded)

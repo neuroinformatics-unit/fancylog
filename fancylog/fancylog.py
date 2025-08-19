@@ -581,9 +581,9 @@ def disable_logging():
 
 def get_default_logging_dir() -> Path | None:
     """Infer the logging directory from the active logger's FileHandler."""
-    logger = logging.getLogger()  # root logger
+    logger = logging.getLogger()
     for handler in logger.handlers:
-        if hasattr(handler, "baseFilename"):  # FileHandler
+        if hasattr(handler, "baseFilename"):
             return Path(handler.baseFilename).parent
     return None
 
