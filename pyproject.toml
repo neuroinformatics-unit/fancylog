@@ -45,6 +45,8 @@ image = [
     "tifffile",
 ]
 
+multiprocessing = ["multiprocessing-logging"]
+
 [build-system]
 requires = [
     "setuptools>=45",
