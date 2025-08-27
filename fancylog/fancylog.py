@@ -599,22 +599,43 @@ def log_image(
     subfolder: str | None = None,
     metadata: dict | None = None,
 ):
-    """Save an image to the logging dir and record its path in the log."""
+    """Save an image to the logging dir and record its path in the log.
+
+    Parameters
+    ----------
+    image : np.ndarray
+        Image data to save.
+    name : str
+        Filename (without extension).
+    logging_dir : str or Path, optional
+        Root logging directory. If None, the default is inferred.
+    subfolder : str, optional
+        Optional subfolder within 'logging_dir/images'.
+    metadata : dict, optional
+        Optional metadata to save as a JSON file in same dir as image.
+
+    Returns
+    -------
+    Path
+        Path to the saved image file.
+
+    """
+    logger = logging.getLogger(__name__)
+
     if logging_dir is None:
         logging_dir = get_default_logging_dir()
         if logging_dir is None:
-            raise ValueError(
-                "Could not infer logging directory from active logger. "
-                "Please provide logging_dir explicitly."
+            logging_dir = Path.cwd() / "logs"
+            logger.info(
+                f"[fancylog] No default logging directory found. "
+                f"Falling back to '{logging_dir}'"
             )
 
     output_dir = Path(logging_dir)
     if subfolder:
-        image_dir = (
-            output_dir / "media" / "images" / _RUN_TIMESTAMP / subfolder
-        )
+        image_dir = output_dir / "logged_images" / _RUN_TIMESTAMP / subfolder
     else:
-        image_dir = output_dir / "media" / "images" / _RUN_TIMESTAMP
+        image_dir = output_dir / "logged_images" / _RUN_TIMESTAMP
     image_dir.mkdir(parents=True, exist_ok=True)
 
     filepath = image_dir / f"{name}.tiff"
@@ -625,7 +646,7 @@ def log_image(
         with open(meta_path, "w") as f:
             json.dump(metadata, f, indent=2)
 
-    logging.getLogger(__name__).info(f"[fancylog] Saved image: {filepath}")
+    logger.info(f"[fancylog] Saved image: {filepath}")
     return filepath
 
 
@@ -634,35 +655,54 @@ def log_data_object(
     name: str,
     logging_dir: str | Path | None = None,
     subfolder: str | None = None,
-    ext: str = "json",
 ):
-    """Save structured data (e.g., dict, list, numpy array) to disk."""
+    """Save structured data (e.g., dict, list, numpy array) to disk.
+
+    Parameters
+    ----------
+    data : dict, list, or np.ndarray
+        The data object to save. Dictionaries and lists are saved as JSON,
+        while NumPy arrays are saved as `.npy` files.
+    name : str
+        Filename (without extension).
+    logging_dir : str or Path, optional
+        Root logging directory. If None, the default is inferred.
+    subfolder : str, optional
+        Optional subfolder within 'logging_dir/data'.
+
+    Returns
+    -------
+    Path
+        Path to the saved data file.
+
+    """
+    logger = logging.getLogger(__name__)
+
     if logging_dir is None:
         logging_dir = get_default_logging_dir()
         if logging_dir is None:
-            raise ValueError(
-                "Could not infer logging directory from active logger. "
-                "Please provide logging_dir explicitly."
+            logging_dir = Path.cwd() / "logs"
+            logger.info(
+                f"[fancylog] No default logging directory found. "
+                f"Falling back to '{logging_dir}'"
             )
 
     output_dir = Path(logging_dir)
     if subfolder:
-        data_dir = output_dir / "media" / "data" / _RUN_TIMESTAMP / subfolder
+        data_dir = output_dir / "logged_data" / _RUN_TIMESTAMP / subfolder
     else:
-        data_dir = output_dir / "media" / "data" / _RUN_TIMESTAMP
+        data_dir = output_dir / "logged_data" / _RUN_TIMESTAMP
     data_dir.mkdir(parents=True, exist_ok=True)
 
-    filepath = data_dir / f"{name}.{ext}"
-
     if isinstance(data, (dict | list)):
+        filepath = data_dir / f"{name}.json"
         with open(filepath, "w") as f:
             json.dump(data, f, indent=2)
     elif isinstance(data, np.ndarray):
+        filepath = data_dir / f"{name}.npy"
         np.save(filepath, data)
     else:
         raise ValueError("Unsupported data type for logging")
 
-    logging.getLogger(__name__).info(
-        f"[fancylog] Saved data object: {filepath}"
-    )
+    logger.info(f"[fancylog] Saved data object: {filepath}")
     return filepath

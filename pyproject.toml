@@ -45,6 +45,10 @@ image = [
     "tifffile",
 ]
 
+array = [
+    "numpy",
+]
+
 multiprocessing = ["multiprocessing-logging"]
 
 [build-system]
@@ -124,6 +128,7 @@ python =
 extras =
     dev
     image
+    array
 commands =
     pytest -v --color=yes --cov=fancylog --cov-report=xml
 """
