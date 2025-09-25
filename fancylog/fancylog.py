@@ -151,12 +151,12 @@ class LoggingHeader:
             if write_variables and variable_objects:
                 self.write_variables(variable_objects)
 
-    def write_git_info(self, program_name, header="GIT INFO"):
+    def write_git_info(self, package_name, header="GIT INFO"):
         """Write information about the git repository state.
 
         Parameters
         ----------
-        program_name
+        package_name
             The name of the installed package, to
             locate and inspect its Git repository.
         header
@@ -165,11 +165,11 @@ class LoggingHeader:
         """
         self.write_separated_section_header(header)
         try:
-            program_path = find_spec(program_name).submodule_search_locations[
+            package_path = find_spec(package_name).submodule_search_locations[
                 0
             ]
-            program_path = os.path.split(program_path)[0]
-            git_info = get_git_info(program_path)
+            package_path = os.path.split(package_path)[0]
+            git_info = get_git_info(package_path)
 
             self.file.write(f"Commit hash: {git_info.head.hash} \n")
             self.file.write(f"Commit message: {git_info.head.message} \n")
