@@ -253,7 +253,10 @@ class LoggingHeader:
             conda_env = os.environ["CONDA_PREFIX"].split(os.sep)[-1]
             conda_exe = os.environ["CONDA_EXE"]
             conda_list = subprocess.run(
-                [conda_exe, "list", "--json"], capture_output=True, text=True
+                [conda_exe, "list", "--json"],
+                capture_output=True,
+                text=True,
+                check=True,
             )
 
             env_pkgs = json.loads(conda_list.stdout)
@@ -263,29 +266,39 @@ class LoggingHeader:
             self.write_packages(env_pkgs)
 
         # If no conda env, fall back to logging pip
-        except KeyError:
-            python_executable = sys.executable
-            pip_list = subprocess.run(
-                [
-                    python_executable,
-                    "-m",
-                    "pip",
-                    "list",
-                    "--verbose",
-                    "--format=json",
-                ],
-                capture_output=True,
-                text=True,
-            )
-
-            all_pkgs = json.loads(pip_list.stdout)
-
+        except (KeyError, subprocess.CalledProcessError, json.JSONDecodeError):
             try:
+                python_executable = sys.executable
+                pip_list = subprocess.run(
+                    [
+                        python_executable,
+                        "-m",
+                        "pip",
+                        "list",
+                        "--verbose",
+                        "--format=json",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+
+                all_pkgs = json.loads(pip_list.stdout)
+
+            except (subprocess.CalledProcessError, json.JSONDecodeError):
+                self.file.write(
+                    "Could not find global pip packages. "
+                    "No packages were logged.\n\n"
+                )
+                return
+
+            virtual_env = os.getenv("VIRTUAL_ENV")
+            if virtual_env:
                 # If there is a local env, log local packages first
                 env_pkgs = [
                     pkg
                     for pkg in all_pkgs
-                    if os.getenv("VIRTUAL_ENV") in pkg["location"]
+                    if virtual_env in str(pkg.get("location", ""))
                 ]
 
                 self.file.write(
@@ -301,7 +314,7 @@ class LoggingHeader:
                 self.file.write("Global environment packages (pip):\n")
                 self.write_packages(global_pkgs)
 
-            except TypeError:
+            else:
                 self.file.write(
                     "No environment found, reporting global pip packages\n\n"
                 )
