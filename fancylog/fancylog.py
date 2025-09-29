@@ -4,6 +4,7 @@ import contextlib
 import logging
 import os
 import sys
+import warnings
 from datetime import datetime
 from importlib.util import find_spec
 
@@ -18,7 +19,7 @@ from fancylog.tools.git import (
 
 def start_logging(
     output_dir,
-    package,
+    package=None,
     variables=None,
     verbose=True,
     file_log_level="DEBUG",
@@ -33,6 +34,7 @@ def start_logging(
     log_to_console=True,
     timestamp=True,
     logger_name=None,
+    program=None,
 ):
     """Prepare the log file, and then begin logging.
 
@@ -73,6 +75,8 @@ def start_logging(
     logger_name
         If None, logger uses default logger; otherwise, logger
         name is set to `logger_name`.
+    program
+        Deprecated alias name for `package`.
 
     Returns
     -------
@@ -82,6 +86,21 @@ def start_logging(
     """
     output_dir = str(output_dir)
     print_log_level = "DEBUG" if verbose else "INFO"
+
+    if program:
+        warnings.warn(
+            "`program` is deprecated since 0.6.0 and will be "
+            "removed in 0.7.0; use `package` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        package = program
+
+    if not package:
+        raise ValueError(
+            "`package` or `program` (deprecated)` must be "
+            "passed to `start_logging()`."
+        )
 
     if log_to_file:
         if filename is None:
