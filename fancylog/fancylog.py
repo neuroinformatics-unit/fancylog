@@ -6,6 +6,7 @@ import logging
 import os
 import subprocess
 import sys
+import warnings
 from datetime import datetime
 from importlib.util import find_spec
 
@@ -20,7 +21,7 @@ from fancylog.tools.git import (
 
 def start_logging(
     output_dir,
-    package,
+    package=None,
     variables=None,
     verbose=True,
     file_log_level="DEBUG",
@@ -37,6 +38,7 @@ def start_logging(
     log_to_console=True,
     timestamp=True,
     logger_name=None,
+    program=None,
 ):
     """Prepare the log file, and then begin logging.
 
@@ -81,6 +83,8 @@ def start_logging(
     logger_name
         If None, logger uses default logger; otherwise, logger
         name is set to `logger_name`.
+    program
+        Deprecated alias name for `package`.
 
     Returns
     -------
@@ -90,6 +94,21 @@ def start_logging(
     """
     output_dir = str(output_dir)
     print_log_level = "DEBUG" if verbose else "INFO"
+
+    if program:
+        warnings.warn(
+            "`program` is deprecated since 0.6.0 and will be "
+            "removed in 0.7.0; use `package` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        package = program
+
+    if not package:
+        raise ValueError(
+            "`package` or `program` (deprecated)` must be "
+            "passed to `start_logging()`."
+        )
 
     if log_to_file:
         if filename is None:
@@ -136,7 +155,7 @@ class LoggingHeader:
     def __init__(
         self,
         file,
-        program,
+        package,
         variable_objects,
         output_dir,
         write_header=True,
@@ -151,13 +170,13 @@ class LoggingHeader:
 
         See start_logging() for parameters.
         """
-        self.program = program
+        self.package = package
 
         with open(file, "w", encoding="utf-8") as self.file:
             if write_header:
                 self.write_log_header(output_dir, log_header)
             if write_git:
-                self.write_git_info(self.program.__name__)
+                self.write_git_info(self.package.__name__)
             if write_cli_args:
                 self.write_command_line_arguments()
             if write_python:
@@ -167,12 +186,12 @@ class LoggingHeader:
             if write_variables and variable_objects:
                 self.write_variables(variable_objects)
 
-    def write_git_info(self, program_name, header="GIT INFO"):
+    def write_git_info(self, package_name, header="GIT INFO"):
         """Write information about the git repository state.
 
         Parameters
         ----------
-        program_name
+        package_name
             The name of the installed package, to
             locate and inspect its Git repository.
         header
@@ -181,11 +200,11 @@ class LoggingHeader:
         """
         self.write_separated_section_header(header)
         try:
-            program_path = find_spec(program_name).submodule_search_locations[
+            package_path = find_spec(package_name).submodule_search_locations[
                 0
             ]
-            program_path = os.path.split(program_path)[0]
-            git_info = get_git_info(program_path)
+            package_path = os.path.split(package_path)[0]
+            git_info = get_git_info(package_path)
 
             self.file.write(f"Commit hash: {git_info.head.hash} \n")
             self.file.write(f"Commit message: {git_info.head.message} \n")
@@ -402,7 +421,7 @@ class LoggingHeader:
         self.file.write("Output directory: " + output_dir + "\n")
         self.file.write("Current directory: " + os.getcwd() + "\n")
         with contextlib.suppress(AttributeError):
-            self.file.write(f"Version: {self.program.__version__}")
+            self.file.write(f"Version: {self.package.__version__}")
 
     def write_separated_section_header(
         self,
