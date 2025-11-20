@@ -1,3 +1,4 @@
+import os
 import time
 
 import pytest
@@ -5,23 +6,26 @@ import pytest
 import fancylog
 
 
-@pytest.mark.parametrize("write_env_packages", [True, False])
-def test_benchmark(tmp_path, capsys, write_env_packages):
+@pytest.mark.skipif(not os.getenv("CI"), reason="Benchmark skipped outside CI")
+def test_benchmark(tmp_path):
+    """
+    A very rough benchmark to check for large regressions
+    in performance. Based on testing on GitHub CI:
+        Windows	test_benchmark	0.026
+        Ubuntu	test_benchmark	0.024
+        macOS	test_benchmark	0.0104
+
+    Only run in CI otherwise might fail locally on different systems.
+    """
     start_time = time.perf_counter()
 
     for _ in range(5):
         fancylog.start_logging(
             tmp_path,
             fancylog,
-            write_env_packages=write_env_packages,
             logger_name="my_logger",
         )
 
     time_taken = time.perf_counter() - start_time
 
-    capsys.readouterr()
-    with capsys.disabled():
-        print(
-            f"TIME TAKEN with "
-            f"write_env_packages={write_env_packages}: {time_taken}"
-        )
+    assert time_taken < 0.04, "Set up is running slower than expected."
