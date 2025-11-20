@@ -5,8 +5,12 @@ import pytest
 
 import fancylog
 
+# Set an environment variable to run benchmarks. This
+# is used to selectively run benchmarks through GitHub CI.
+RUN_BENCHMARKS = os.getenv("RUN_BENCHMARKS", "").lower() == "true"
 
-@pytest.mark.skipif(not os.getenv("CI"), reason="Benchmark skipped outside CI")
+
+@pytest.mark.skipif(not RUN_BENCHMARKS, reason="`RUN_BENCHMARKS` was false`")
 def test_benchmark(tmp_path, capsys):
     """
     A very rough benchmark to check for large regressions

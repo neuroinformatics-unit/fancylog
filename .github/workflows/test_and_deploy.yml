@@ -39,6 +39,9 @@ jobs:
     steps:
       # Run tests
       - uses: neuroinformatics-unit/actions/test@v2
+        env:
+          # To not skip test_benchmarks
+          RUN_BENCHMARKS: true
         with:
           python-version: ${{ matrix.python-version }}
           secret-codecov-token: ${{ secrets.CODECOV_TOKEN }}
