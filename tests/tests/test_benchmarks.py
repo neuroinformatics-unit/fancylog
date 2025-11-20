@@ -7,7 +7,7 @@ import fancylog
 
 
 @pytest.mark.skipif(not os.getenv("CI"), reason="Benchmark skipped outside CI")
-def test_benchmark(tmp_path):
+def test_benchmark(tmp_path, capsys):
     """
     A very rough benchmark to check for large regressions
     in performance. Based on testing on GitHub CI:
@@ -28,5 +28,9 @@ def test_benchmark(tmp_path):
         )
 
     time_taken = time.perf_counter() - start_time
+
+    capsys.readouterr()
+    with capsys.disabled():
+        print(f"`test_benchmark` time taken: {time_taken}")
 
     assert time_taken < 0.04, "Set up is running slower than expected."
