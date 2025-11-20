@@ -15,7 +15,8 @@ def test_benchmark(tmp_path):
         Ubuntu	test_benchmark	0.024
         macOS	test_benchmark	0.0104
 
-    Only run in CI otherwise might fail locally on different systems.
+    Only run in CI otherwise might fail on different systems as
+    the cutoff threshold is based on GitHub runners.
     """
     start_time = time.perf_counter()
 
