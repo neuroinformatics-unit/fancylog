@@ -32,7 +32,7 @@ def start_logging(
     write_git=True,
     write_cli_args=True,
     write_python=True,
-    write_env_packages=True,
+    write_env_packages=False,
     write_variables=True,
     log_to_file=True,
     log_to_console=True,
