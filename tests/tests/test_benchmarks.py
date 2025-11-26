@@ -1,14 +1,8 @@
-import os
 import time
-
-import pytest
 
 import fancylog
 
 
-@pytest.mark.skipif(
-    not os.getenv("GITHUB_ACTIONS"), reason="`RUN_BENCHMARKS` was false`"
-)
 def test_benchmark(tmp_path, capsys):
     """
     A very rough benchmark to check for large regressions
@@ -16,9 +10,6 @@ def test_benchmark(tmp_path, capsys):
         Windows	test_benchmark	0.026
         Ubuntu	test_benchmark	0.024
         macOS	test_benchmark	0.0104
-
-    Only run in CI otherwise might fail on different systems as
-    the cutoff threshold is based on GitHub runners.
     """
     start_time = time.perf_counter()
 

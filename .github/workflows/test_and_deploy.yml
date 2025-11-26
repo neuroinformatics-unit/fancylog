@@ -42,7 +42,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           secret-codecov-token: ${{ secrets.CODECOV_TOKEN }}
-          tox-args: "--override testenv.pass_env=GITHUB_ACTIONS"
 
   build_sdist_wheels:
     name: Build source distribution
