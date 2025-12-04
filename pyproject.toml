@@ -118,6 +118,7 @@ python =
 [testenv]
 extras =
     dev
+    git
 commands =
     pytest -v --color=yes --cov=fancylog --cov-report=xml
 """

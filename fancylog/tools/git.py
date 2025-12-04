@@ -50,6 +50,7 @@ class GitInfo:
         repo
             A gitpython repo object.
         """
+        self.repo = repo
         self.head = GitHead(repo.head.commit)
 
 
