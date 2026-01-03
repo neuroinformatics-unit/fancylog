@@ -185,6 +185,7 @@ class LoggingHeader:
                 self.write_environment_packages()
             if write_variables and variable_objects:
                 self.write_variables(variable_objects)
+            self.write_separated_section_header("LOGGING")
 
     def write_git_info(self, package_name, header="GIT INFO"):
         """Write information about the git repository state.
@@ -367,7 +368,6 @@ class LoggingHeader:
             self.write_variables_from_object_list(variable_objects)
         else:
             self.write_variables_from_slot_type_list(variable_objects)
-        self.write_separated_section_header("LOGGING")
 
     def write_variables_from_slot_type_list(self, variable_objects):
         """Write variables and their values from a namedtuple-like object.
