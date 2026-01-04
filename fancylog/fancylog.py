@@ -581,6 +581,7 @@ def setup_logging(
 
         try:
             import multiprocessing
+
             import multiprocessing_logging
 
             if multiprocessing.current_process().name != "MainProcess":
