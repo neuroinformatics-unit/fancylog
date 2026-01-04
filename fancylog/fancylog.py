@@ -580,14 +580,22 @@ def setup_logging(
             )
 
         try:
+            import multiprocessing
             import multiprocessing_logging
 
-            multiprocessing_logging.install_mp_handler()
-            logging.info("Starting logging")
-            logging.info(
-                "Multiprocessing-logging module found. Logging from all"
-                " processes"
-            )
+            if multiprocessing.current_process().name != "MainProcess":
+                multiprocessing_logging.install_mp_handler()
+                logging.info("Starting logging")
+                logging.info(
+                    "Multiprocessing-logging module found. Logging from all"
+                    " processes"
+                )
+            else:
+                logger.info("Starting logging")
+                logger.info(
+                    "Multiprocessing-logging enabled, "
+                    "but running in main process"
+                )
         except ModuleNotFoundError:
             logging.info("Starting logging")
             logging.info(
