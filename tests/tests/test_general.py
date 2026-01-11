@@ -11,6 +11,7 @@ import pytest
 from rich.logging import RichHandler
 
 import fancylog
+import fancylog.tools.git
 
 lateral_separator = "**************"
 
@@ -425,3 +426,10 @@ def test_mock_no_environment(tmp_path):
 
             assert f"{'fancylog':20} {'1.1.1'}"
             assert f"{'pytest':20} {'1.1.1'}"
+
+
+def test_git_info():
+    repo = fancylog.tools.git.get_git_info("").repo
+    for _c in repo.iter_commits():
+        pass
+    assert _c.message == "Initial commit"
