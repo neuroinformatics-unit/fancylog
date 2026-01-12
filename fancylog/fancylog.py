@@ -4,12 +4,12 @@ import contextlib
 import json
 import logging
 import os
+import platform
 import subprocess
 import sys
 import warnings
 from datetime import datetime
 from importlib.util import find_spec
-import platform
 
 from rich.logging import RichHandler
 
@@ -569,10 +569,10 @@ def setup_logging(
         warnings.warn(
             "Multiprocessing logging is not supported on Windows. "
             "It has been disabled.",
-            UserWarning
+            UserWarning,
         )
         multiprocessing_aware = False
-    
+
     logger = initialise_logger(
         filename,
         print_level=print_level,
