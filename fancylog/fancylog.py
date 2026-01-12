@@ -569,7 +569,8 @@ def setup_logging(
         warnings.warn(
             "Multiprocessing logging is not supported on Windows. "
             "It has been disabled.",
-            UserWarning
+            UserWarning,
+            stacklevel=2
         )
         multiprocessing_aware = False
     
