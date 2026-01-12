@@ -9,6 +9,7 @@ import sys
 import warnings
 from datetime import datetime
 from importlib.util import find_spec
+import platform
 
 from rich.logging import RichHandler
 
@@ -564,6 +565,14 @@ def setup_logging(
         Name of the logger to use. If None, the default logger is used.
 
     """
+    if multiprocessing_aware and platform.system() == "Windows":
+        warnings.warn(
+            "Multiprocessing logging is not supported on Windows. "
+            "It has been disabled.",
+            UserWarning
+        )
+        multiprocessing_aware = False
+    
     logger = initialise_logger(
         filename,
         print_level=print_level,
@@ -580,22 +589,14 @@ def setup_logging(
             )
 
         try:
-            import multiprocessing
             import multiprocessing_logging
 
-            if multiprocessing.current_process().name != "MainProcess":
-                multiprocessing_logging.install_mp_handler()
-                logging.info("Starting logging")
-                logging.info(
-                    "Multiprocessing-logging module found. Logging from all"
-                    " processes"
-                )
-            else:
-                logger.info("Starting logging")
-                logger.info(
-                    "Multiprocessing-logging enabled, "
-                    "but running in main process"
-                )
+            multiprocessing_logging.install_mp_handler()
+            logging.info("Starting logging")
+            logging.info(
+                "Multiprocessing-logging module found. Logging from all"
+                " processes"
+            )
         except ModuleNotFoundError:
             logging.info("Starting logging")
             logging.info(
