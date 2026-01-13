@@ -571,7 +571,7 @@ def setup_logging(
             "with `logger_name`. Multiprocess logging"
             "must be performed with the root logger."
         )
-    
+
     if multiprocessing_aware and platform.system() == "Windows":
         warnings.warn(
             "Multiprocessing logging is not supported on Windows. "
@@ -588,7 +588,7 @@ def setup_logging(
         log_to_console=log_to_console,
         logger_name=logger_name,
     )
-    
+
     if multiprocessing_aware:
         try:
             import multiprocessing_logging
