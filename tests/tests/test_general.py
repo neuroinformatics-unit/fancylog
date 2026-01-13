@@ -432,7 +432,9 @@ def test_multiprocessing_warning_on_windows(tmp_path):
     is disabled on Windows.
     """
     with patch("platform.system", return_value="Windows"):
-        with pytest.warns(UserWarning, match="Multiprocessing logging is not supported"):
+        with pytest.warns(
+            UserWarning, match="Multiprocessing logging is not supported"
+        ):
             fancylog.start_logging(
                 tmp_path,
                 fancylog,
