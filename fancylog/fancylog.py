@@ -4,6 +4,7 @@ import contextlib
 import json
 import logging
 import os
+import platform
 import subprocess
 import sys
 import warnings
@@ -564,6 +565,22 @@ def setup_logging(
         Name of the logger to use. If None, the default logger is used.
 
     """
+    if multiprocessing_aware and logger_name:
+        raise ValueError(
+            "`multiprocessing_aware` is not supported"
+            "with `logger_name`. Multiprocess logging"
+            "must be performed with the root logger."
+        )
+
+    if multiprocessing_aware and platform.system() == "Windows":
+        warnings.warn(
+            "Multiprocessing logging is not supported on Windows. "
+            "It has been disabled.",
+            UserWarning,
+            stacklevel=2,
+        )
+        multiprocessing_aware = False
+
     logger = initialise_logger(
         filename,
         print_level=print_level,
@@ -571,14 +588,8 @@ def setup_logging(
         log_to_console=log_to_console,
         logger_name=logger_name,
     )
-    if multiprocessing_aware:
-        if logger_name:
-            raise ValueError(
-                "`multiprocessing_aware` is not supported"
-                "with `logger_name`. Multiprocess logging"
-                "must be performed with the root logger."
-            )
 
+    if multiprocessing_aware:
         try:
             import multiprocessing_logging
 
