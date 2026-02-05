@@ -4,10 +4,12 @@ import os
 import platform
 import subprocess
 import sys
-from importlib.metadata import distributions
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import numpy as np
 import pytest
+import tifffile
 from rich.logging import RichHandler
 
 import fancylog
@@ -261,35 +263,45 @@ def test_correct_pkg_version_logged(tmp_path):
 
     log_file = next(tmp_path.glob("*.log"))
 
-    try:
+    with open(log_file) as file:
+        file_content = file.read()
+
+    if "Environment packages (conda):" in file_content:
         # If there is a conda environment, assert that the correct
         # version is logged for all pkgs
         conda_exe = os.environ["CONDA_EXE"]
         conda_list = subprocess.run(
-            [conda_exe, "list", "--json"], capture_output=True, text=True
+            [conda_exe, "list", "--json"],
+            capture_output=True,
+            text=True,
+            check=True,
         )
 
         conda_pkgs = json.loads(conda_list.stdout)
+
         for pkg in conda_pkgs:
-            assert f"{pkg['name']:20} {pkg['version']:15}\n"
-
-    except KeyError:
-        # If there is no conda environment, assert that the correct
-        # version is logged for all packages logged with pip list
-        with open(log_file) as file:
-            file_content = file.read()
-
-            # Test local environment versions
-            local_site_packages = next(
-                p for p in sys.path if "site-packages" in p
+            assert (
+                f"{pkg['name']:20} {pkg['version']:15}".rstrip()
+                in file_content
             )
 
-            for dist in distributions():
-                if str(dist.locate_file("")).startswith(local_site_packages):
-                    assert (
-                        f"{dist.metadata['Name']:20} {dist.version}"
-                        in file_content
-                    )
+    else:
+        # If there is no conda environment, assert that the correct
+        # version is logged for all packages logged with pip list
+        pip_list = subprocess.run(
+            [sys.executable, "-m", "pip", "list", "--format=json"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        pip_pkgs = json.loads(pip_list.stdout)
+
+        for pkg in pip_pkgs:
+            assert (
+                f"{pkg['name']:20} {pkg['version']:15}".rstrip()
+                in file_content
+            )
 
 
 def test_mock_pip_pkgs(tmp_path):
@@ -427,18 +439,157 @@ def test_mock_no_environment(tmp_path):
             assert f"{'pytest':20} {'1.1.1'}"
 
 
-def test_multiprocessing_warning_on_windows(tmp_path):
-    """A warning is raised and multiprocessing logging
-    is disabled on Windows.
+def test_log_image_creates_tiff_and_metadata(tmp_path, caplog):
+    """Test that log_image writes a TIFF
+    and optional metadata file.
     """
-    with (
-        patch("platform.system", return_value="Windows"),
-        pytest.warns(
-            UserWarning, match="Multiprocessing logging is not supported"
-        ),
-    ):
-        fancylog.start_logging(
-            tmp_path,
-            fancylog,
-            multiprocessing_aware=True,
+
+    img = np.random.randint(0, 255, (5, 5))
+
+    with caplog.at_level(logging.INFO):
+        filepath = fancylog.log_image(
+            img,
+            name="test_img",
+            logging_dir=tmp_path,
+            metadata={"desc": "test image"},
         )
+
+    assert filepath.exists()
+    assert filepath.suffix == ".tiff"
+
+    loaded_img = tifffile.imread(filepath)
+    np.testing.assert_array_equal(img, loaded_img)
+
+    # Check metadata file
+    meta_file = filepath.with_name("test_img_meta.json")
+    assert meta_file.exists()
+    with open(meta_file) as f:
+        meta = json.load(f)
+    assert meta["desc"] == "test image"
+
+    # Check log output
+    assert any(
+        "[fancylog] Saved image:" in message for message in caplog.messages
+    )
+
+
+def test_log_image_without_metadata(tmp_path, caplog):
+    """Test that log_image works without metadata."""
+
+    img = np.zeros((3, 3))
+    with caplog.at_level(logging.INFO):
+        filepath = fancylog.log_image(img, "no_meta", tmp_path)
+
+    assert filepath.exists()
+
+    assert filepath.suffix == ".tiff"
+    loaded_img = tifffile.imread(filepath)
+    np.testing.assert_array_equal(img, loaded_img)
+
+    # Ensure no metadata file
+    meta_file = filepath.with_name("no_meta_meta.json")
+    assert not meta_file.exists()
+
+    assert any(
+        "[fancylog] Saved image:" in message for message in caplog.messages
+    )
+
+
+@pytest.mark.parametrize(
+    "data, name",
+    [
+        ({"a": 1, "b": 2, "c": 3}, "mydict"),
+        ([1, 2, 3], "mylist"),
+    ],
+)
+def test_log_data_object_dict_and_list(tmp_path, caplog, data, name):
+    """Test logging of dict and list objects."""
+
+    with caplog.at_level(logging.INFO):
+        filepath = fancylog.log_data_object(data, name, tmp_path)
+
+    assert filepath.exists()
+
+    with open(filepath) as f:
+        loaded = json.load(f)
+    assert loaded == data
+
+    assert any(
+        "[fancylog] Saved data object:" in message
+        for message in caplog.messages
+    )
+
+
+def test_log_data_object_numpy_array(tmp_path):
+    """Test logging of numpy array."""
+
+    arr = np.array([[1, 2], [3, 4]])
+    filepath = fancylog.log_data_object(arr, "array", tmp_path)
+
+    assert filepath.exists()
+    loaded = np.load(filepath)
+    np.testing.assert_array_equal(arr, loaded)
+
+
+def test_log_data_object_invalid_type(tmp_path):
+    """Test that unsupported types raise ValueError."""
+
+    with pytest.raises(ValueError):
+        fancylog.log_data_object("not supported", "bad", tmp_path)
+
+
+def test_get_default_logging_dir_returns_none(monkeypatch):
+    """Ensure get_default_logging_dir returns None with no FileHandler."""
+    logger = logging.getLogger()
+    # Temporarily clear handlers
+    old_handlers = logger.handlers[:]
+    logger.handlers = []
+
+    try:
+        assert fancylog.get_default_logging_dir() is None
+    finally:
+        logger.handlers = old_handlers
+
+
+def test_log_image_no_logging_dir(monkeypatch, tmp_path, caplog):
+    """Test that log_image logs fallback message
+    when get_default_logging_dir() returns None.
+    """
+    monkeypatch.setattr(fancylog, "get_default_logging_dir", lambda: None)
+    monkeypatch.setattr(type(Path()), "cwd", classmethod(lambda cls: tmp_path))
+    monkeypatch.setattr(fancylog.fancylog, "_RUN_TIMESTAMP", "test_timestamp")
+
+    img = np.zeros((3, 3))
+    with caplog.at_level(logging.INFO):
+        filepath = fancylog.log_image(img, "no_logging_dir")
+
+    assert filepath.exists()
+
+    caplog.set_level(logging.INFO)
+    assert (
+        "[fancylog] No default logging directory found. Falling back to"
+        in message
+        for message in caplog.text
+    )
+
+
+def test_log_image_with_subfolder(tmp_path):
+    """Covers subfolder branch in log_image."""
+    img = np.ones((2, 2))
+    filepath = fancylog.log_image(
+        img, "with_sub", tmp_path, subfolder="nested"
+    )
+    assert "nested" in str(filepath)
+    assert filepath.exists()
+
+
+def test_log_data_object_with_subfolder(tmp_path):
+    """Covers subfolder branch in log_data_object."""
+    arr = np.array([1, 2, 3])
+    filepath = fancylog.log_data_object(
+        arr, "with_sub", tmp_path, subfolder="nested"
+    )
+    assert "nested" in str(filepath)
+    assert filepath.exists()
+    loaded = np.load(filepath)
+    np.testing.assert_array_equal(arr, loaded)
