@@ -4,7 +4,6 @@ import os
 import platform
 import subprocess
 import sys
-from importlib.metadata import distributions
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -264,35 +263,45 @@ def test_correct_pkg_version_logged(tmp_path):
 
     log_file = next(tmp_path.glob("*.log"))
 
-    try:
+    with open(log_file) as file:
+        file_content = file.read()
+
+    if "Environment packages (conda):" in file_content:
         # If there is a conda environment, assert that the correct
         # version is logged for all pkgs
         conda_exe = os.environ["CONDA_EXE"]
         conda_list = subprocess.run(
-            [conda_exe, "list", "--json"], capture_output=True, text=True
+            [conda_exe, "list", "--json"],
+            capture_output=True,
+            text=True,
+            check=True,
         )
 
         conda_pkgs = json.loads(conda_list.stdout)
+
         for pkg in conda_pkgs:
-            assert f"{pkg['name']:20} {pkg['version']:15}\n"
-
-    except KeyError:
-        # If there is no conda environment, assert that the correct
-        # version is logged for all packages logged with pip list
-        with open(log_file) as file:
-            file_content = file.read()
-
-            # Test local environment versions
-            local_site_packages = next(
-                p for p in sys.path if "site-packages" in p
+            assert (
+                f"{pkg['name']:20} {pkg['version']:15}".rstrip()
+                in file_content
             )
 
-            for dist in distributions():
-                if str(dist.locate_file("")).startswith(local_site_packages):
-                    assert (
-                        f"{dist.metadata['Name']:20} {dist.version}"
-                        in file_content
-                    )
+    else:
+        # If there is no conda environment, assert that the correct
+        # version is logged for all packages logged with pip list
+        pip_list = subprocess.run(
+            [sys.executable, "-m", "pip", "list", "--format=json"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        pip_pkgs = json.loads(pip_list.stdout)
+
+        for pkg in pip_pkgs:
+            assert (
+                f"{pkg['name']:20} {pkg['version']:15}".rstrip()
+                in file_content
+            )
 
 
 def test_mock_pip_pkgs(tmp_path):
