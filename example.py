@@ -1,5 +1,4 @@
 import logging
-import sys
 
 import fancylog
 
@@ -41,4 +40,15 @@ def main(directory):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Fancylog example")
+    parser.add_argument(
+        "directory",
+        metavar="directory",
+        nargs=1,
+        help="Directory for log files.",
+    )
+
+    args = parser.parse_args()
+    main(args.directory[0])
