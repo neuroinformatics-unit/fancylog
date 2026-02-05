@@ -557,6 +557,7 @@ def test_log_image_no_logging_dir(monkeypatch, tmp_path, caplog):
     """
     monkeypatch.setattr(fancylog, "get_default_logging_dir", lambda: None)
     monkeypatch.setattr(type(Path()), "cwd", classmethod(lambda cls: tmp_path))
+    monkeypatch.setattr(fancylog.fancylog, "_RUN_TIMESTAMP", "test_timestamp")
 
     img = np.zeros((3, 3))
     with caplog.at_level(logging.INFO):

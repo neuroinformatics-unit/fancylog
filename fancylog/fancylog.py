@@ -674,7 +674,9 @@ def log_image(
                 f"Falling back to '{logging_dir}'"
             )
 
-    output_dir = Path(logging_dir)
+    # Ensure path is absolute and writable
+    output_dir = Path(logging_dir).expanduser().resolve()
+
     if subfolder:
         image_dir = output_dir / "logged_images" / _RUN_TIMESTAMP / subfolder
     else:
