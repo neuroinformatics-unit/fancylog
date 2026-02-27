@@ -40,6 +40,7 @@ class SubLog:
         The sub-log's logger instance.
     log_file : str
         Path to the sub-log file.
+
     """
 
     def __init__(
@@ -91,7 +92,7 @@ class SubLog:
                 ch = RichHandler()
             except ImportError:
                 ch = logging.StreamHandler()
-            ch.setLevel(getattr(logging, "DEBUG"))
+            ch.setLevel(logging.DEBUG)
             ch.setFormatter(formatter)
             self.logger.addHandler(ch)
 
@@ -198,7 +199,7 @@ def sub_log(
         whether to add a timestamp to the sub-log filename.
         Default: True.
 
-    outputs:    
+    outputs:
     SubLog
         The sub-log instance.
 
