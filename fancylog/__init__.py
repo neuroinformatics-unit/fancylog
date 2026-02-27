@@ -7,3 +7,4 @@ except PackageNotFoundError:
     pass
 
 from fancylog.fancylog import start_logging
+from fancylog.sublog import SubLog, sub_log
