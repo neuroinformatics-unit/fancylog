@@ -52,6 +52,7 @@ class SubLog:
         log_to_console=False,
         timestamp=True,
     ):
+        """Initialize a sub-log logger and its output file."""
         self.name = name
         self.output_dir = str(output_dir)
         self.parent_logger_name = parent_logger_name
@@ -130,7 +131,7 @@ class SubLog:
             The command to run (passed to subprocess.run).
         **kwargs
             Additional keyword arguments passed to subprocess.run.
-            Note: stdout and stderr will be set to subprocess.PIPE
+            Note: capture_output will be enabled internally
             and cannot be overridden.
 
         Returns
@@ -147,8 +148,7 @@ class SubLog:
 
         result = subprocess.run(
             command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             text=True,
             **kwargs,
         )

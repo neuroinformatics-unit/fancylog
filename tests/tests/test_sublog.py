@@ -314,7 +314,7 @@ class TestSubLogSubprocess:
             parent_logger_name="main_stderr",
             timestamp=False,
         ) as sl:
-            result = sl.run_subprocess(
+            sl.run_subprocess(
                 [
                     sys.executable,
                     "-c",
