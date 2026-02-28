@@ -1,6 +1,5 @@
 """Tests for the sub-logging feature."""
 
-import logging
 import os
 import sys
 
@@ -16,7 +15,9 @@ class TestSubLogCreation:
     def test_sub_log_creates_file(self, tmp_path):
         """A sub-log should create a separate log file."""
         fancylog.start_logging(
-            tmp_path, fancylog, logger_name="main_test",
+            tmp_path,
+            fancylog,
+            logger_name="main_test",
             log_to_console=False,
         )
 
@@ -35,7 +36,9 @@ class TestSubLogCreation:
     def test_sub_log_creates_file_with_timestamp(self, tmp_path):
         """A sub-log with timestamp=True should have a timestamped filename."""
         fancylog.start_logging(
-            tmp_path, fancylog, logger_name="main_ts",
+            tmp_path,
+            fancylog,
+            logger_name="main_ts",
             log_to_console=False,
         )
 
@@ -56,7 +59,9 @@ class TestSubLogCreation:
     def test_sub_log_has_own_logger(self, tmp_path):
         """The sub-log should have its own named logger."""
         fancylog.start_logging(
-            tmp_path, fancylog, logger_name="main_logger_test",
+            tmp_path,
+            fancylog,
+            logger_name="main_logger_test",
             log_to_console=False,
         )
 
@@ -92,7 +97,9 @@ class TestSubLogWriting:
     def test_sub_log_writes_to_own_file(self, tmp_path):
         """Messages logged to sub-log should appear in its file."""
         fancylog.start_logging(
-            tmp_path, fancylog, logger_name="main_write",
+            tmp_path,
+            fancylog,
+            logger_name="main_write",
             log_to_console=False,
         )
 
@@ -114,7 +121,9 @@ class TestSubLogWriting:
     def test_sub_log_does_not_write_to_main_log(self, tmp_path):
         """Messages logged to sub-log should NOT appear in the main log."""
         main_log = fancylog.start_logging(
-            tmp_path, fancylog, logger_name="main_isolated",
+            tmp_path,
+            fancylog,
+            logger_name="main_isolated",
             log_to_console=False,
             timestamp=False,
         )
@@ -139,7 +148,9 @@ class TestSubLogWriting:
     def test_main_log_contains_reference(self, tmp_path):
         """The main log should contain a reference to the sub-log file."""
         main_log = fancylog.start_logging(
-            tmp_path, fancylog, logger_name="main_ref",
+            tmp_path,
+            fancylog,
+            logger_name="main_ref",
             log_to_console=False,
             timestamp=False,
         )
@@ -168,7 +179,9 @@ class TestSubLogContextManager:
     def test_context_manager_creates_and_closes(self, tmp_path):
         """The context manager should create a sub-log and close it."""
         fancylog.start_logging(
-            tmp_path, fancylog, logger_name="main_ctx",
+            tmp_path,
+            fancylog,
+            logger_name="main_ctx",
             log_to_console=False,
         )
 
@@ -191,21 +204,25 @@ class TestSubLogContextManager:
     def test_context_manager_closes_on_exception(self, tmp_path):
         """The context manager should close the sub-log even on exception."""
         fancylog.start_logging(
-            tmp_path, fancylog, logger_name="main_exc",
+            tmp_path,
+            fancylog,
+            logger_name="main_exc",
             log_to_console=False,
         )
 
         log_file = None
-        with pytest.raises(ValueError, match="test error"):
-            with sub_log(
+        with (
+            pytest.raises(ValueError, match="test error"),
+            sub_log(
                 "exc_step",
                 tmp_path,
                 parent_logger_name="main_exc",
                 timestamp=False,
-            ) as sl:
-                log_file = sl.log_file
-                sl.logger.info("Before exception")
-                raise ValueError("test error")
+            ) as sl,
+        ):
+            log_file = sl.log_file
+            sl.logger.info("Before exception")
+            raise ValueError("test error")
 
         # Sub-log should still have been written and closed
         assert log_file is not None
@@ -218,20 +235,24 @@ class TestSubLogContextManager:
     def test_multiple_sub_logs(self, tmp_path):
         """Multiple sub-logs can be created sequentially."""
         main_log = fancylog.start_logging(
-            tmp_path, fancylog, logger_name="main_multi",
+            tmp_path,
+            fancylog,
+            logger_name="main_multi",
             log_to_console=False,
             timestamp=False,
         )
 
         with sub_log(
-            "step1", tmp_path,
+            "step1",
+            tmp_path,
             parent_logger_name="main_multi",
             timestamp=False,
         ) as sl1:
             sl1.logger.info("Step 1 message")
 
         with sub_log(
-            "step2", tmp_path,
+            "step2",
+            tmp_path,
             parent_logger_name="main_multi",
             timestamp=False,
         ) as sl2:
@@ -255,7 +276,9 @@ class TestSubLogSubprocess:
     def test_run_subprocess_captures_stdout(self, tmp_path):
         """Subprocess stdout should be captured in the sub-log."""
         fancylog.start_logging(
-            tmp_path, fancylog, logger_name="main_proc",
+            tmp_path,
+            fancylog,
+            logger_name="main_proc",
             log_to_console=False,
         )
 
@@ -279,7 +302,9 @@ class TestSubLogSubprocess:
     def test_run_subprocess_captures_stderr(self, tmp_path):
         """Subprocess stderr should be captured in the sub-log."""
         fancylog.start_logging(
-            tmp_path, fancylog, logger_name="main_stderr",
+            tmp_path,
+            fancylog,
+            logger_name="main_stderr",
             log_to_console=False,
         )
 
@@ -291,8 +316,9 @@ class TestSubLogSubprocess:
         ) as sl:
             result = sl.run_subprocess(
                 [
-                    sys.executable, "-c",
-                    "import sys; sys.stderr.write('warning msg\\n')"
+                    sys.executable,
+                    "-c",
+                    "import sys; sys.stderr.write('warning msg\\n')",
                 ]
             )
 
@@ -304,7 +330,9 @@ class TestSubLogSubprocess:
     def test_run_subprocess_logs_return_code(self, tmp_path):
         """Subprocess return code should be logged."""
         fancylog.start_logging(
-            tmp_path, fancylog, logger_name="main_rc",
+            tmp_path,
+            fancylog,
+            logger_name="main_rc",
             log_to_console=False,
         )
 
@@ -314,9 +342,7 @@ class TestSubLogSubprocess:
             parent_logger_name="main_rc",
             timestamp=False,
         ) as sl:
-            sl.run_subprocess(
-                [sys.executable, "-c", "exit(0)"]
-            )
+            sl.run_subprocess([sys.executable, "-c", "exit(0)"])
 
         with open(sl.log_file) as f:
             content = f.read()
@@ -326,7 +352,9 @@ class TestSubLogSubprocess:
     def test_run_subprocess_nonzero_exit(self, tmp_path):
         """Non-zero return codes from subprocesses should be logged."""
         fancylog.start_logging(
-            tmp_path, fancylog, logger_name="main_nz",
+            tmp_path,
+            fancylog,
+            logger_name="main_nz",
             log_to_console=False,
         )
 
@@ -336,9 +364,7 @@ class TestSubLogSubprocess:
             parent_logger_name="main_nz",
             timestamp=False,
         ) as sl:
-            result = sl.run_subprocess(
-                [sys.executable, "-c", "exit(1)"]
-            )
+            result = sl.run_subprocess([sys.executable, "-c", "exit(1)"])
 
         assert result.returncode == 1
 
@@ -367,9 +393,7 @@ class TestSubLogHandlerCleanup:
 
     def test_handlers_removed_after_context_manager(self, tmp_path):
         """Handlers should be removed after context manager exits."""
-        with sub_log(
-            "ctx_cleanup", tmp_path, timestamp=False
-        ) as sl:
+        with sub_log("ctx_cleanup", tmp_path, timestamp=False) as sl:
             logger = sl.logger
             assert len(logger.handlers) > 0
 
