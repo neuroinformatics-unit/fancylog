@@ -1,6 +1,8 @@
 import logging
+import sys
 
 import fancylog
+from fancylog.sublog import sub_log
 
 
 class MadeUpPaths:
@@ -36,6 +38,31 @@ def main(directory):
 
     logger.info("This is an info message")
     logger.debug("This is a debug message")
+
+    logger.info("Starting pipeline...")
+
+    with sub_log(
+        "preprocessing",
+        directory,
+        parent_logger_name="my_logger",
+        timestamp=True,
+    ) as sl:
+        sl.logger.info("Running preprocessing step 1")
+        sl.logger.debug("Detailed preprocessing debug info")
+        sl.logger.info("Running preprocessing step 2")
+
+    with sub_log(
+        "external_tool",
+        directory,
+        parent_logger_name="my_logger",
+        timestamp=True,
+    ) as sl:
+        sl.logger.info("About to run external tool")
+        sl.run_subprocess(
+            [sys.executable, "-c", "print('Tool output line 1')"]
+        )
+
+    logger.info("here comes the completion of the example :(")
     logger.warning("This fun logging experience is about to end :(")
 
 

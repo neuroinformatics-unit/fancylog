@@ -199,9 +199,9 @@ def sub_log(
         whether to add a timestamp to the sub-log filename.
         Default: True.
 
-    outputs:
-    SubLog
-        The sub-log instance.
+    outputs:    
+    sublog instance.
+        
 
     """
     sl = SubLog(
