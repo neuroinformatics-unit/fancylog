@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import platform
+import shutil
 import subprocess
 import sys
 from unittest.mock import MagicMock, patch
@@ -269,53 +270,44 @@ def test_environment_header(boolean, operator, tmp_path):
 
 
 def test_correct_pkg_version_logged(tmp_path):
-    """Package versions logged should be equal to
-    the output of `conda list` or `pip list`.
+    """Package versions logged should be equal to the output of
+    whichever backend `write_environment_packages` actually used.
+
+    The backend is picked the same way the library picks it (conda,
+    then uv, then pip), so this stays a real-environment check rather
+    than forcing a branch that may not work here. For example, a venv
+    created by `uv venv` (as tox-uv does on CI) has no `pip` installed
+    at all, so forcing the pip branch would fail. The individual
+    branches are covered in isolation by the mocked tests below.
     """
-    # Force the pip subprocess branch when there is no conda env, so the
-    # comparison below is deterministic regardless of whether uv happens
-    # to be installed on the machine running the test.
-    with patch("shutil.which", return_value=None):
-        fancylog.start_logging(tmp_path, fancylog, write_env_packages=True)
+    fancylog.start_logging(tmp_path, fancylog, write_env_packages=True)
 
     log_file = next(tmp_path.glob("*.log"))
+    file_content = log_file.read_text()
 
-    try:
-        # If there is a conda environment, assert that the correct
-        # version is logged for all pkgs
-        conda_exe = os.environ["CONDA_EXE"]
-        conda_list = subprocess.run(
-            [conda_exe, "list", "--json"], capture_output=True, text=True
-        )
+    conda_exe = os.environ.get("CONDA_EXE")
+    uv_exe = shutil.which("uv")
 
-        conda_pkgs = json.loads(conda_list.stdout)
-        for pkg in conda_pkgs:
-            assert f"{pkg['name']:20} {pkg['version']:15}\n"
+    if conda_exe:
+        command = [conda_exe, "list", "--json"]
+    elif uv_exe:
+        command = [uv_exe, "pip", "list", "--format=json"]
+    else:
+        command = [
+            sys.executable,
+            "-m",
+            "pip",
+            "list",
+            "--verbose",
+            "--format=json",
+        ]
 
-    except KeyError:
-        # If there is no conda environment, assert that the correct
-        # version is logged for all packages reported by `pip list`
-        with open(log_file) as file:
-            file_content = file.read()
+    pkg_list = subprocess.run(
+        command, capture_output=True, text=True, check=True
+    )
 
-            pip_list = subprocess.run(
-                [
-                    sys.executable,
-                    "-m",
-                    "pip",
-                    "list",
-                    "--verbose",
-                    "--format=json",
-                ],
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-
-            for pkg in json.loads(pip_list.stdout):
-                assert (
-                    f"{pkg['name']:20} {pkg['version']:15}\n" in file_content
-                )
+    for pkg in json.loads(pkg_list.stdout):
+        assert f"{pkg['name']:20} {pkg['version']:15}\n" in file_content
 
 
 def _make_fake_pkg(name, version, location):
