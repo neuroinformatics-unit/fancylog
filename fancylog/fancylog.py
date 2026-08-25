@@ -5,11 +5,11 @@ import json
 import logging
 import os
 import platform
+import shutil
 import subprocess
 import sys
 import warnings
 from datetime import datetime
-from importlib.metadata import distributions
 from importlib.util import find_spec
 
 from rich.logging import RichHandler
@@ -255,7 +255,10 @@ class LoggingHeader:
         """Write the local/global environment packages used to run the script.
 
         Attempt to collect conda packages and, if this fails,
-        collect the packages installed in the running Python environment.
+        collect pip packages via a subprocess call. If pip itself isn't
+        installed (e.g. a venv created and managed purely by uv), fall
+        back to `uv pip list`, which implements the same interface
+        without depending on pip being present.
 
         Parameters
         ----------
@@ -281,45 +284,88 @@ class LoggingHeader:
             self.file.write(f"Conda environment: {conda_env}\n\n")
             self.file.write("Environment packages (conda):\n")
             self.write_packages(env_pkgs)
+            return
 
-        # If no conda env, fall back to logging installed packages
-        # via importlib.metadata, which does not depend on pip
-        # being installed in the running environment.
         except (KeyError, subprocess.CalledProcessError, json.JSONDecodeError):
-            all_pkgs = [
-                {
-                    "name": dist.metadata["Name"],
-                    "version": dist.version,
-                    "location": str(dist.locate_file("")),
-                }
-                for dist in distributions()
+            pass
+
+        # If no conda env, fall back to pip. `uv pip list` is tried first
+        # when uv is available: it's a much cheaper subprocess call than
+        # spawning a full `python -m pip` interpreter, and it works even
+        # in venvs managed purely by uv, where a `pip` package may not
+        # be installed at all.
+        uv_exe = shutil.which("uv")
+        if uv_exe:
+            try:
+                uv_list = subprocess.run(
+                    [uv_exe, "pip", "list", "--format=json"],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+
+                self.file.write(
+                    "No conda environment found, reporting uv packages\n\n"
+                )
+                self.file.write("Environment packages (uv pip):\n")
+                self.write_packages(json.loads(uv_list.stdout))
+                return
+
+            except (subprocess.CalledProcessError, json.JSONDecodeError):
+                pass
+
+        try:
+            python_executable = sys.executable
+            pip_list = subprocess.run(
+                [
+                    python_executable,
+                    "-m",
+                    "pip",
+                    "list",
+                    "--verbose",
+                    "--format=json",
+                ],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+
+            all_pkgs = json.loads(pip_list.stdout)
+
+        except (subprocess.CalledProcessError, json.JSONDecodeError):
+            self.file.write(
+                "Could not find conda, pip or uv packages. "
+                "No packages were logged.\n\n"
+            )
+            return
+
+        virtual_env = os.getenv("VIRTUAL_ENV")
+        if virtual_env:
+            # If there is a local env, log local packages first
+            env_pkgs = [
+                pkg
+                for pkg in all_pkgs
+                if virtual_env in str(pkg.get("location", ""))
             ]
 
-            virtual_env = os.getenv("VIRTUAL_ENV")
-            if virtual_env:
-                # If there is a local env, log local packages first
-                env_pkgs = [
-                    pkg for pkg in all_pkgs if virtual_env in pkg["location"]
-                ]
+            self.file.write(
+                "No conda environment found, reporting pip packages\n\n"
+            )
+            self.file.write("Local environment packages (pip):\n")
+            self.write_packages(env_pkgs)
+            self.file.write("\n")
 
-                self.file.write(
-                    "No conda environment found, reporting pip packages\n\n"
-                )
-                self.file.write("Local environment packages (pip):\n")
-                self.write_packages(env_pkgs)
-                self.file.write("\n")
+            # Log global-available packages (if any)
+            global_pkgs = [pkg for pkg in all_pkgs if pkg not in env_pkgs]
 
-                # Log global-available packages (if any)
-                global_pkgs = [pkg for pkg in all_pkgs if pkg not in env_pkgs]
+            self.file.write("Global environment packages (pip):\n")
+            self.write_packages(global_pkgs)
 
-                self.file.write("Global environment packages (pip):\n")
-                self.write_packages(global_pkgs)
-
-            else:
-                self.file.write(
-                    "No environment found, reporting global pip packages\n\n"
-                )
-                self.write_packages(all_pkgs)
+        else:
+            self.file.write(
+                "No environment found, reporting global pip packages\n\n"
+            )
+            self.write_packages(all_pkgs)
 
     def write_packages(self, env_pkgs):
         """Write the packages in the local environment.
