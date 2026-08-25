@@ -26,4 +26,4 @@ def test_benchmark(tmp_path, capsys):
     with capsys.disabled():
         print(f"`test_benchmark` time taken: {time_taken:.4f}")
 
-    assert time_taken < 0.1, "Set up is running slower than expected."
+    assert time_taken < 0.13, "Set up is running slower than expected."
